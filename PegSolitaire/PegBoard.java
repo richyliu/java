@@ -129,26 +129,12 @@ public class PegBoard {
 	public void putPeg(int row, int col) { board[row][col] = 'P'; }
 	
 	/**
-	 *	Put a peg into the location.
-	 *	Precondition: loc must be a valid location.
-	 *	@param loc		location of peg
-	 */
-	public void putPeg(Location loc) { putPeg(loc.getRow(), loc.getCol()); }
-	
-	/**
 	 *	Remove a peg from the location.
 	 *	Precondition: (row, col) must be a valid location.
 	 *	@param row		row to remove peg
 	 *	@param col		column to remove peg
 	 */
 	public void removePeg(int row, int col) { board[row][col] = ' '; }
-	
-	/**
-	 *	Remove a peg from the location.
-	 *	Precondition: loc must be a valid location.
-	 *	@param loc		location of peg
-	 */
-	public void removePeg(Location loc) { removePeg(loc.getRow(), loc.getCol()); }
 	
 	/**
 	 *	Determine if peg is in location
@@ -158,14 +144,6 @@ public class PegBoard {
 	 *	@return			true if peg in location; false otherwise
 	 */
 	public boolean isPeg(int row, int col) { return board[row][col] == 'P'; }
-	
-	/**
-	 *	Determine if peg is in location
-	 *	Precondition: loc must be a valid location.
-	 *	@param loc		location of peg
-	 *	@return			true if peg in location; false otherwise
-	 */
-	public boolean isPeg(Location loc) { return isPeg(loc.getRow(), loc.getCol()); }
 	
 	/** @return		size of the board */
 	public int getBoardSize() { return BOARD_SIZE; }

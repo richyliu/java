@@ -5,12 +5,13 @@ public class PegTester {
 		PegSolitaire ps = new PegSolitaire();
 		ps.run();
 		
-		System.out.println(ps.getPegMoves(new Location(3, 1)));
+		is(ps.isValidJumperPeg(new Location(3, 1)), true);
+		is(ps.getJumperPeg(), new Location(3, 1));
 	}
 	
-	public void is(Location a, Location b) {
+	public static <T> void is(T a, T b) {
 		if (a.equals(b))
-			System.out.println("Success: " + a);
+			System.out.println("SUCCESS: " + a);
 		else
 			System.out.println("FAILED: " + a + " not equal to " + b);
 	}
