@@ -47,7 +47,24 @@ public class PegSolitaire {
 			// peg might be null if user exits
 			if (peg != null)
 				jumpChoosePeg(peg);
+
+            // check if there are any remaining moves. if not, exit the game
+            // start by assuming no valid pegs
+            boolean noValid = true;
+
+            for (int row = 0; row < 7 && noValid; row++)
+                for (int col = 0; col < 7 && noValid; col++)
+                    // once a valid peg is found, exit the loop
+                    if (isValidJumperPeg(row, col))
+                        noValid = false;
+
+            // indeed no valid pegs, exit the game
+            if (noValid)
+                exit = true;
 		}
+
+        // print the board once more
+        board.printBoard();
 		
 		// thank the user for playing
 		System.out.println("\nYour score: " + board.pegCount());
@@ -142,9 +159,9 @@ public class PegSolitaire {
 	 * @param y		Y location of the peg
 	 * @return 		True if peg has valid jumps
 	 */
-	/*public boolean isValidJumperPeg(int x, int y) {
+	public boolean isValidJumperPeg(int x, int y) {
 		return isValidJumperPeg(new Location(x, y));
-	}*/
+	}
 	
 	
 	/**
@@ -163,7 +180,7 @@ public class PegSolitaire {
 				exit = true;
 			} else {
 				if (
-					// check str is only 3 chars long
+					// check str is at least 3 chars long
 					userStr.length() == 3 &&
 					// first char should be number between 0 and 9
 					userStr.charAt(0) >= ZERO_ASCII &&
