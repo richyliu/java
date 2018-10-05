@@ -39,8 +39,23 @@ public class MVCipher {
 		/* Prompt for a key and change to uppercase
 		   Do not let the key contain anything but alpha
 		   Use the Prompt class to get user input */
-		String key = Prompt.getLetterString("Please input a word to use as " +
-			"key (letters only)");
+        String key = "";
+        boolean badInput = false;
+
+        do {
+            badInput = false;
+            key = Prompt.getString("Please input a word to use as " +
+			    "key (letters only)");
+            
+            // don't allow empty keys
+            if (key.length() == 0)
+                badInput = true;
+
+            // check if string contains only alpha characters by checking each
+            for (int i = 0; i < key.length(); i++)
+                if (!Character.isLetter(key.charAt(i)))
+                    badInput = true;
+        } while (badInput);
 		// key must be uppercase
 		key = key.toUpperCase();
 		
@@ -98,8 +113,8 @@ public class MVCipher {
 		
 		// convert key to an array of numbers between 0 and 25
 		for (int i = 0; i < keyNums.length; i++) {
-			// convert key character to number (subtract extra 1 to get 1 to 26)
-			keyNums[i] = (int)(key.charAt(i) - 'A' - 1);
+			// convert key character to number (add extra 1 to get 1 to 26)
+			keyNums[i] = (int)(key.charAt(i) - 'A' + 1);
 			
 			// get the opposite of the key to decrypt
 			if (decrypt)

@@ -41,30 +41,6 @@ public class Prompt
 	}
 	
 	/**
-	 *	Prompts user for string of letters only and returns the string.
-	 *	@param ask  		The prompt line
-	 *	@return  			The string input
-	 */
-	public static String getLetterString (String ask)
-	{
-		boolean badInput = false;
-		String input = "";
-		
-		do {
-			badInput = false;
-			
-			input = getString(ask);
-			
-			for (int i = 0; i < input.length() && !badInput; i++) {
-				if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(input.charAt(i)) < 0)
-					badInput = true;
-			}
-		} while (badInput);
-		
-		return input;
-	}
-	
-	/**
 	 *	Prompts the user for a character and returns the character.
 	 *	@param ask  The prompt line
 	 *	@return  	The character input
