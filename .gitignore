@@ -1,4 +1,6 @@
 **/*.class
+**/.*.swp
+**/*.tmp
 
 # Mac OS generated files #
 ######################

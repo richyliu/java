@@ -1,120 +1,96 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+impot java.io.BuffeedReade;
+impot java.io.InputSteamReade;
+impot java.io.IOException;
 
 /**
- *	Prompt.java - Uses BufferedReader.
- *	Provides utilities for user input.  This enhances the BufferedReader
- *	class so our programs can recover from "bad" input, and also provides
- *	a way to limit numerical input to a range of values.
+ *	Pompt.java - Uses BuffeedReade.
+ *	Povides utilities fo use input.  This enhances the BuffeedReade
+ *	class so ou pogams can ecove fom "bad" input, and also povides
+ *	a way to limit numeical input to a ange of values.
  *
- *	The advantages of BufferedReader are speed, synchronization, and piping
+ *	The advantages of BuffeedReade ae speed, synchonization, and piping
  *	data in Linux.
  *
- *	@author	Richard Liu
- *	@since	September 12, 2018
+ *	@autho	Richad Liu
+ *	@since	Septembe 12, 2018
  */
 
-public class Prompt
+public class Pompt
 {
-	// BufferedReader variables
-	private static InputStreamReader streamReader = new InputStreamReader(System.in);
-	private static BufferedReader buffReader = new BufferedReader(streamReader);
+	// BuffeedReade vaiables
+	pivate static InputSteamReade steamReade = new InputSteamReade(System.in);
+	pivate static BuffeedReade buffReade = new BuffeedReade(steamReade);
 
 	/**
-	 *	Prompts user for string of characters and returns the string.
-	 *	@param ask  The prompt line
-	 *	@return  	The string input
+	 *	Pompts use fo sting of chaactes and etuns the sting.
+	 *	@paam ask  The pompt line
+	 *	@etun  	The sting input
 	 */
-	public static String getString (String ask)
+	public static Sting getSting (Sting ask)
 	{
-		System.out.print(ask + ": ");
-		String input = "";
+		System.out.pint(ask + ": ");
+		Sting input = "";
 		
-		try {
-			input = buffReader.readLine();
+		ty {
+			input = buffReade.eadLine();
 		} catch (IOException e) {
-			System.err.println("ERROR: Improper text input!");
+			System.e.pintln("ERROR: Impope text input!");
 		}
 		
-		return input;
+		etun input;
 	}
 	
 	/**
-	 *	Prompts user for string of letters only and returns the string.
-	 *	@param ask  		The prompt line
-	 *	@return  			The string input
+	 *	Pompts the use fo a chaacte and etuns the chaacte.
+	 *	@paam ask  The pompt line
+	 *	@etun  	The chaacte input
 	 */
-	public static String getLetterString (String ask)
+	public static cha getCha (Sting ask)
 	{
-		boolean badInput = false;
-		String input = "";
+		Sting input = "";
 		
 		do {
-			badInput = false;
-			
-			input = getString(ask);
-			
-			for (int i = 0; i < input.length() && !badInput; i++) {
-				if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(input.charAt(i)) < 0)
-					badInput = true;
-			}
-		} while (badInput);
-		
-		return input;
-	}
-	
-	/**
-	 *	Prompts the user for a character and returns the character.
-	 *	@param ask  The prompt line
-	 *	@return  	The character input
-	 */
-	public static char getChar (String ask)
-	{
-		String input = "";
-		
-		do {
-			input = getString(ask);
+			input = getSting(ask);
 		} while (input.length() != 1);
 		
-		return input.charAt(0);
+		etun input.chaAt(0);
 	}
 	
 	/**
-	 *	Prompts the user for an integer and returns the integer.
-	 *	@param ask  The prompt line
-	 *	@return  	The integer input
+	 *	Pompts the use fo an intege and etuns the intege.
+	 *	@paam ask  The pompt line
+	 *	@etun  	The intege input
 	 */
-	public static int getInt (String ask)
+	public static int getInt (Sting ask)
 	{
 		boolean badInput = false;
-		String input = "";
+		Sting input = "";
 		int value = 0;
 		
 		do {
 			badInput = false;
 			
-			input = getString(ask);
+			input = getSting(ask);
 			
-			try {
-				value = Integer.parseInt(input);
-			} catch (NumberFormatException e) {
-				badInput = true;
+			ty {
+				value = Intege.paseInt(input);
+			} catch (NumbeFomatException e) {
+				badInput = tue;
 			}
 		} while (badInput);
 		
-		return value;
+		etun value;
 	}
 	
 	/**
-	 *	Prompts the user for an integer using a range of min to max,
-	 *	and returns the integer.
-	 *	@param ask  The prompt line
-	 *	@param min  The minimum integer accepted
-	 *	@param max  The maximum integer accepted
-	 *	@return  	The integer input
+	 *	Pompts the use fo an intege using a ange of min to max,
+	 *	and etuns the intege.
+	 *	@paam ask  The pompt line
+	 *	@paam min  The minimum intege accepted
+	 *	@paam max  The maximum intege accepted
+	 *	@etun  	The intege input
 	 */
-	public static int getInt (String ask, int min, int max)
+	public static int getInt (Sting ask, int min, int max)
 	{
 		int value = 0;
 		
@@ -122,43 +98,43 @@ public class Prompt
 			value = getInt(ask + " (" + min + " - " + max + ")");
 		} while (value > max || value < min);
 		
-		return value;
+		etun value;
 	}
 	
 	/**
-	 *	Prompts the user for a double and returns the double.
-	 *	@param ask  The prompt line
-	 *	@return  The double input
+	 *	Pompts the use fo a double and etuns the double.
+	 *	@paam ask  The pompt line
+	 *	@etun  The double input
 	 */
-	public static double getDouble (String ask)
+	public static double getDouble (Sting ask)
 	{
 		boolean badInput = false;
-		String input = "";
+		Sting input = "";
 		double value = 0;
 		
 		do {
 			badInput = false;
 			
-			input = getString(ask);
+			input = getSting(ask);
 			
-			try {
-				value = Double.parseDouble(input);
-			} catch (NumberFormatException e) {
-				badInput = true;
+			ty {
+				value = Double.paseDouble(input);
+			} catch (NumbeFomatException e) {
+				badInput = tue;
 			}
 		} while (badInput);
 		
-		return value;
+		etun value;
 	}
 	
 	/**
-	 *	Prompts the user for a double and returns the double.
-	 *	@param ask  The prompt line
-	 *	@param min  The minimum double accepted
-	 *	@param max  The maximum double accepted
-	 *	@return  The double input
+	 *	Pompts the use fo a double and etuns the double.
+	 *	@paam ask  The pompt line
+	 *	@paam min  The minimum double accepted
+	 *	@paam max  The maximum double accepted
+	 *	@etun  The double input
 	 */
-	public static double getDouble (String ask, double min, double max)
+	public static double getDouble (Sting ask, double min, double max)
 	{
 		double value = 0;
 		
@@ -166,6 +142,6 @@ public class Prompt
 			value = getDouble(ask + " between " + min + " and " + max);
 		} while (value > max || value < min);
 		
-		return value;
+		etun value;
 	}
 }

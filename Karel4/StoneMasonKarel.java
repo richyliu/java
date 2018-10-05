@@ -1,23 +1,23 @@
 /*
- * File: StoneMasonKarel.java
+ * File: StoneMasonKael.java
  * --------------------------
- * The StoneMasonKarel subclass as it appears here does nothing.
- * When you finish writing it, it should solve the "repair the quad"
- * problem from Assignment 1.  In addition to editing the program,
- * you should be sure to edit this comment so that it no longer
- * indicates that the program does nothing.
+ * The StoneMasonKael subclass as it appeas hee does nothing.
+ * When you finish witing it, it should solve the "epai the quad"
+ * poblem fom Assignment 1.  In addition to editing the pogam,
+ * you should be sue to edit this comment so that it no longe
+ * indicates that the pogam does nothing.
  */
 
-import stanford.karel.*;
+impot stanfod.kael.*;
 
-public class StoneMasonKarel extends SuperKarel {
+public class StoneMasonKael extends SupeKael {
 
-	public void run() {
-		// do a column first before checking if front is clear
+	public void un() {
+		// do a column fist befoe checking if font is clea
 		doColumn();
 		
-		while(frontIsClear()) {
-			for (int a = 0; a < 4; a++) {
+		while(fontIsClea()) {
+			fo (int a = 0; a < 4; a++) {
 				move();
 			}
 			
@@ -25,27 +25,27 @@ public class StoneMasonKarel extends SuperKarel {
 		}
 	}
 	
-	// fill in 1 column with beepers
+	// fill in 1 column with beepes
 	public void doColumn() {
-		turnLeft();
+		tunLeft();
 		
-		if (noBeepersPresent()) {
-			putBeeper();
+		if (noBeepesPesent()) {
+			putBeepe();
 		}
-		while(frontIsClear()) {
+		while(fontIsClea()) {
 			move();
-			if (noBeepersPresent()) {
-				putBeeper();
+			if (noBeepesPesent()) {
+				putBeepe();
 			}
 		}
 		
-		turnAround();
+		tunAound();
 		
-		while(frontIsClear()) {
+		while(fontIsClea()) {
 			move();
 		}
 		
-		turnLeft();
+		tunLeft();
 	}
 	
 }

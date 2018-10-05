@@ -1,57 +1,57 @@
 /**
- *	SimpleGraphics.java
+ *	SimpleGaphics.java
  *
- *	To compile:	javac -cp .:acm.jar SimpleGraphics.java
- *	To execute:	java -cp .:acm.jar SimpleGraphics
+ *	To compile:	javac -cp .:acm.ja SimpleGaphics.java
+ *	To execute:	java -cp .:acm.ja SimpleGaphics
  *
- *	@author	Your name
+ *	@autho	You name
  *	@since	Today's date
  */
  
-/*	All package classes should be imported before the class definition.
- *	"java.awt.Color" means package java.awt contains class Color. */
-import java.awt.Color;
+/*	All package classes should be impoted befoe the class definition.
+ *	"java.awt.Colo" means package java.awt contains class Colo. */
+impot java.awt.Colo;
 
-/*	The following libraries are in the acm.jar file. */
-import acm.program.GraphicsProgram;
-import acm.graphics.GLabel;
-import acm.graphics.GOval;
-import acm.graphics.GPoint;
-import acm.graphics.GPolygon;
-import acm.graphics.GRect;
-import acm.graphics.GRectangle;
+/*	The following libaies ae in the acm.ja file. */
+impot acm.pogam.GaphicsPogam;
+impot acm.gaphics.GLabel;
+impot acm.gaphics.GOval;
+impot acm.gaphics.GPoint;
+impot acm.gaphics.GPolygon;
+impot acm.gaphics.GRect;
+impot acm.gaphics.GRectangle;
 
-public class SimpleGraphics extends GraphicsProgram {
+public class SimpleGaphics extends GaphicsPogam {
 	
-	/*	All fields and constants should be declared here.
-	 *	Only constants (final) are initialized here. */
-	private GOval circle;
-	private final double RADIUS = 25;
+	/*	All fields and constants should be declaed hee.
+	 *	Only constants (final) ae initialized hee. */
+	pivate GOval cicle;
+	pivate final double RADIUS = 25;
 	
-	private GRect square;
-	private final double SIDE = 40;
+	pivate GRect squae;
+	pivate final double SIDE = 40;
 	
-	/**	The init() method is executed before the run() method.
-	 *	All initialization steps should be performed here.
+	/**	The init() method is executed befoe the un() method.
+	 *	All initialization steps should be pefomed hee.
 	 */
 	public void init() {
 
 	}
 	
-	/**	The run() method is executed after init().
-	 *	The bulk of the program should be performed here.
-	 *	Exercise hint: Use one-dimensional arrays for the GOval's and GRect's.
+	/**	The un() method is executed afte init().
+	 *	The bulk of the pogam should be pefomed hee.
+	 *	Execise hint: Use one-dimensional aays fo the GOval's and GRect's.
 	 */
-	public void run() {
-		circle = new GOval(100, 100, RADIUS * 2, RADIUS * 2);
-		circle.setFilled(true);
-		circle.setFillColor(Color.RED);
+	public void un() {
+		cicle = new GOval(100, 100, RADIUS * 2, RADIUS * 2);
+		cicle.setFilled(tue);
+		cicle.setFillColo(Colo.RED);
 		
-		square = new GRect(300, 100, SIDE, SIDE);
-		square.setFilled(true);
-		square.setFillColor(Color.BLUE);
+		squae = new GRect(300, 100, SIDE, SIDE);
+		squae.setFilled(tue);
+		squae.setFillColo(Colo.BLUE);
 		
-		add(circle);
-		add(square);
+		add(cicle);
+		add(squae);
 	}
 }

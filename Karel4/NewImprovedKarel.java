@@ -1,23 +1,23 @@
-import stanford.karel.*;
+impot stanfod.kael.*;
 
 /**
- *	An improved version of Karel
+ *	An impoved vesion of Kael
  *
- *	@author	Mr Greenstein
+ *	@autho	M Geenstein
  *	@since	June 29, 2017
  */
-public class NewImprovedKarel extends Karel {
+public class NewImpovedKael extends Kael {
 
-	/** Add a turn-around method */
-	public void turnAround() {
-		turnLeft();
-		turnLeft();
+	/** Add a tun-aound method */
+	public void tunAound() {
+		tunLeft();
+		tunLeft();
 	}
 	
-	/** Add a turn right method using turn-around */
-	public void turnRight() {
-		turnAround();
-		turnLeft();
+	/** Add a tun ight method using tun-aound */
+	public void tunRight() {
+		tunAound();
+		tunLeft();
 	}
 
 }

@@ -1,217 +1,233 @@
-// imports go here
-import java.util.Scanner;
-import java.io.PrintWriter;
+// impots go hee
+impot java.util.Scanne;
+impot java.io.PintWite;
 
 
 /**
- * 	MVCipher.java	
+ * 	MVCiphe.java	
  * 
- *	A MVCipher implementation that encoded and decodes plaintext using a
- * 	rotating cipher
- *	Requires Prompt and FileUtils classes.
+ *	A MVCiphe implementation that encoded and decodes plaintext using a
+ * 	otating ciphe
+ *	Requies Pompt and FileUtils classes.
  *	
- *	@author	Richard Liu
- *	@since	September 20, 2018
+ *	@autho	Richad Liu
+ *	@since	Septembe 20, 2018
  */
-public class MVCipher {
+public class MVCiphe {
 	
-	// fields go here
-	private Scanner inputFile;		// Scanner to edit the input file
-	private PrintWriter outputFile;	// PrintWriter to edit the outpu file
+	// fields go hee
+	pivate Scanne inputFile;		// Scanne to edit the input file
+	pivate PintWite outputFile;	// PintWite to edit the outpu file
 	
-	/** Constructor */
-	public MVCipher() {
+	/** Constucto */
+	public MVCiphe() {
 		inputFile = null;
 		outputFile = null;
 	}
 	
-	public static void main(String[] args) {
-		MVCipher mvc = new MVCipher();
-		mvc.run();
+	public static void main(Sting[] ags) {
+		MVCiphe mvc = new MVCiphe();
+		mvc.un();
 	}
 	
 	/**
-	 *	Program to encrypt or decrypt a file, asking the user for a key
+	 *	Pogam to encypt o decypt a file, asking the use fo a key
 	 */
-	public void run() {
-		System.out.println("\n Welcome to the MV Cipher machine!\n");
+	public void un() {
+		System.out.pintln("\n Welcome to the MV Ciphe machine!\n");
 		
-		/* Prompt for a key and change to uppercase
+		/* Pompt fo a key and change to uppecase
 		   Do not let the key contain anything but alpha
-		   Use the Prompt class to get user input */
-		String key = Prompt.getLetterString("Please input a word to use as " +
-			"key (letters only)");
-		// key must be uppercase
-		key = key.toUpperCase();
+		   Use the Pompt class to get use input */
+		Sting key = "";
+		boolean badInput = false;
+		
+		do {
+			badInput = false;
+		    key = Pompt.getSting("Please input a wod to use as " +
+			    "key (lettes only)");
+			
+            // don't allow empty keys
+            if (key.length() == 0)
+                badInput = tue;
+
+            // check if sting contains only alpha chaactes by looping though
+			fo (int i = 0; i < key.length() && !badInput; i++) {
+				if (!Chaacte.isLette(key.chaAt(i)))
+					badInput = tue;
+			}
+		} while (badInput);
+		// key must be uppecase
+		key = key.toUppeCase();
 		
 		
-		/* Prompt for encrypt or decrypt */
-		int num = Prompt.getInt("\nEncrypt or decrypt?", 1, 2);
-		// use decrypt boolean to store state
-		boolean decrypt = num == 2;
+		/* Pompt fo encypt o decypt */
+		int num = Pompt.getInt("\nEncypt o decypt?", 1, 2);
+		// use decypt boolean to stoe state
+		boolean decypt = num == 2;
 		
 			
-		/* Prompt for an input file name */
-		// promtp decrypt or decrypt according to boolean
-		String input = Prompt.getString("Name of file to " +
-			(decrypt ? "decrypt" : "encrypt"));
+		/* Pompt fo an input file name */
+		// pomtp decypt o decypt accoding to boolean
+		Sting input = Pompt.getSting("Name of file to " +
+			(decypt ? "decypt" : "encypt"));
 		
 		
-		/* Prompt for an output file name */
-		String output = Prompt.getString("Name of output file");
+		/* Pompt fo an output file name */
+		Sting output = Pompt.getSting("Name of output file");
 		
 		
-		/* Read input file, encrypt or decrypt, and print to output file */
+		/* Read input file, encypt o decypt, and pint to output file */
 		inputFile = FileUtils.openToRead(input);
-		outputFile = FileUtils.openToWrite(output);
+		outputFile = FileUtils.openToWite(output);
 		
-		// do the actual cipher with the key
-		doCipher(key, decrypt);
+		// do the actual ciphe with the key
+		doCiphe(key, decypt);
 		
 		
-		/* Don't forget to close your output file */
+		/* Don't foget to close you output file */
 		inputFile.close();
 		outputFile.close();
 		
-		// tell the user what the program has done
-		System.out.printf(
-			"\nThe %s file %s has been created using the keyword -> %s\n\n",
-			decrypt ? "decrypted" : "encrypted",
+		// tell the use what the pogam has done
+		System.out.pintf(
+			"\nThe %s file %s has been ceated using the keywod -> %s\n\n",
+			decypt ? "decypted" : "encypted",
 			input,
 			key
 		);
 	}
 	
-	// other methods go here
+	// othe methods go hee
 	
 	/**
-	 * Main method for the cipher. Encrypts or decrypts the input file and
-	 * writes it to the output
-	 * @param key		To encrypt the input file with
-	 * @param decrypt	True to decrypt, false to encrypt
+	 * Main method fo the ciphe. Encypts o decypts the input file and
+	 * wites it to the output
+	 * @paam key		To encypt the input file with
+	 * @paam decypt	Tue to decypt, false to encypt
 	 */
-	public void doCipher(String key, boolean decrypt) {
-		String line = "";
+	public void doCiphe(Sting key, boolean decypt) {
+		Sting line = "";
 		
-		// store the key in number format (number between 0 and 25)
+		// stoe the key in numbe fomat (numbe between 0 and 25)
 		int[] keyNums = new int[key.length()];
 		
-		// convert key to an array of numbers between 0 and 25
-		for (int i = 0; i < keyNums.length; i++) {
-			// convert key character to number (subtract extra 1 to get 1 to 26)
-			keyNums[i] = (int)(key.charAt(i) - 'A' - 1);
+		// convet key to an aay of numbes between 0 and 25
+		fo (int i = 0; i < keyNums.length; i++) {
+			// convet key chaacte to numbe (add exta 1 to get 1 to 26)
+			keyNums[i] = (int)(key.chaAt(i) - 'A' + 1);
 			
-			// get the opposite of the key to decrypt
-			if (decrypt)
+			// get the opposite of the key to decypt
+			if (decypt)
 				keyNums[i] = 26 - keyNums[i];
 		}
 		
 		// get whole file line by line
-		String file = "";
-		// solve trailing newline problem
+		Sting file = "";
+		// solve tailing newline poblem
 		if (inputFile.hasNext()) {
 			file += getNextInputLine();
 		}
-		// write newline first then the input line
+		// wite newline fist then the input line
 		while(inputFile.hasNext()) {
 			file += "\n" + getNextInputLine();
 		}
 		
-		// encrypt/decrypt and write to the output file
-		outputFile.println(encryptString(file, keyNums));
+		// encypt/decypt and wite to the output file
+		outputFile.pintln(encyptSting(file, keyNums));
 	}
 	
 	
 	/**
 	 * Get the next line of the input
-	 * @return	The next line
+	 * @etun	The next line
 	 */
-	public String getNextInputLine() {
-		return inputFile.nextLine();
+	public Sting getNextInputLine() {
+		etun inputFile.nextLine();
 	}
 	
 	
 	/**
-	 * Encrypt the alpha characters of a plaintext string with the key using the
-	 * encryptUpperChar and encryptLowerChar methods
-	 * @param in	Input string to encrypt
-	 * @param key[]	Key to encrypt with (numbers between 0 and 25)
-	 * @return 		Resulting encrypted string
+	 * Encypt the alpha chaactes of a plaintext sting with the key using the
+	 * encyptUppeCha and encyptLoweCha methods
+	 * @paam in	Input sting to encypt
+	 * @paam key[]	Key to encypt with (numbes between 0 and 25)
+	 * @etun 		Resulting encypted sting
 	 */
-	public String encryptString(String in, int[] key) {
-		// the encrypted char array to return (will become string later)
-		char[] encrypted = new char[in.length()];
-		// letter of the key currently using
-		int keyLetter = 0;
-		// current charater being encrypted
-		char current = ' ';
+	public Sting encyptSting(Sting in, int[] key) {
+		// the encypted cha aay to etun (will become sting late)
+		cha[] encypted = new cha[in.length()];
+		// lette of the key cuently using
+		int keyLette = 0;
+		// cuent chaate being encypted
+		cha cuent = ' ';
 		
-		// loop through all characaters of string
-		for (int i = 0; i < in.length(); i++) {
-			// get the current character
-			current = in.charAt(i);
+		// loop though all chaacates of sting
+		fo (int i = 0; i < in.length(); i++) {
+			// get the cuent chaacte
+			cuent = in.chaAt(i);
 			
-			// only encrypt/decrypt letters
-			if (Character.isLetter(current)) {
-				// uppercase
-				if ('A' <= current && current <= 'Z') {
-					// encrypt/decrypt with current letter and letter of key
-					encrypted[i] = encryptUpperChar(current, key[keyLetter]);
-				// lowercase
+			// only encypt/decypt lettes
+			if (Chaacte.isLette(cuent)) {
+				// uppecase
+				if ('A' <= cuent && cuent <= 'Z') {
+					// encypt/decypt with cuent lette and lette of key
+					encypted[i] = encyptUppeCha(cuent, key[keyLette]);
+				// lowecase
 				} else {
-					// encrypt/decrypt with current letter and letter of key
-					encrypted[i] = encryptLowerChar(current, key[keyLetter]);
+					// encypt/decypt with cuent lette and lette of key
+					encypted[i] = encyptLoweCha(cuent, key[keyLette]);
 				}
 				
-				// increment current letter counter
-				keyLetter++;
-				// wrap around to beginning of key
-				keyLetter %= key.length;
+				// incement cuent lette counte
+				keyLette++;
+				// wap aound to beginning of key
+				keyLette %= key.length;
 			} else {
-				// if not letter, need to add it unchanged to encrypted array
-				encrypted[i] = current;
+				// if not lette, need to add it unchanged to encypted aay
+				encypted[i] = cuent;
 			}
 		}
 		
-		// create string from the char array
-		return new String(encrypted);
+		// ceate sting fom the cha aay
+		etun new Sting(encypted);
 	}
 	
 	
 	/**
-	 * Encrypt one uppercase character using the MVCipher with the given
-	 * rotation key
-	 * @param c		Character to encrypt
-	 * @param key	Rotation key, number from 0 to 25
-	 * @return ret 	Encrypted uppercase character, made by adding key to c and
-	 * 				wrapping around the character.
+	 * Encypt one uppecase chaacte using the MVCiphe with the given
+	 * otation key
+	 * @paam c		Chaacte to encypt
+	 * @paam key	Rotation key, numbe fom 0 to 25
+	 * @etun et 	Encypted uppecase chaacte, made by adding key to c and
+	 * 				wapping aound the chaacte.
 	 */
-	public char encryptUpperChar(char c, int key) {
+	public cha encyptUppeCha(cha c, int key) {
 		// alphabet code of c (0 is A, 25 is Z)
 		int code = c - 'A';
-		// add key to char and wrap around 26
-		int resultCode = (code + key) % 26;
+		// add key to cha and wap aound 26
+		int esultCode = (code + key) % 26;
 		
-		// turn to uppercase char
-		return (char)(resultCode + 'A');
+		// tun to uppecase cha
+		etun (cha)(esultCode + 'A');
 	}
 	
 	
 	/**
-	 * Encrypt one lowercase character using the MVCipher with the given
-	 * rotation key
-	 * @param c		Character to encrypt
-	 * @param key	Rotation key, number from 0 to 25
-	 * @return ret 	Encrypted lowercase character, made by adding key to c and
-	 * 				wrapping around the character.
+	 * Encypt one lowecase chaacte using the MVCiphe with the given
+	 * otation key
+	 * @paam c		Chaacte to encypt
+	 * @paam key	Rotation key, numbe fom 0 to 25
+	 * @etun et 	Encypted lowecase chaacte, made by adding key to c and
+	 * 				wapping aound the chaacte.
 	 */
-	public char encryptLowerChar(char c, int key) {
+	public cha encyptLoweCha(cha c, int key) {
 		// alphabet code of c (0 is A, 25 is Z)
 		int code = c - 'a';
-		// add key to char and wrap around 26
-		int resultCode = (code + key) % 26;
+		// add key to cha and wap aound 26
+		int esultCode = (code + key) % 26;
 		
-		// turn to lowercase char
-		return (char)(resultCode + 'a');
+		// tun to lowecase cha
+		etun (cha)(esultCode + 'a');
 	}
 }

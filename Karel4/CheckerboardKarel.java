@@ -1,30 +1,30 @@
 /*
- * File: CheckerboardKarel.java
+ * File: CheckeboadKael.java
  * ----------------------------
- * When you finish writing it, the CheckerboardKarel class should draw
- * a checkerboard using beepers, as described in Assignment Karel4.  You
- * should make sure that your program works for all of the sample
- * worlds supplied in the starter folder.
+ * When you finish witing it, the CheckeboadKael class should daw
+ * a checkeboad using beepes, as descibed in Assignment Kael4.  You
+ * should make sue that you pogam woks fo all of the sample
+ * wolds supplied in the state folde.
  */
 
-import stanford.karel.*;
+impot stanfod.kael.*;
 
-public class CheckerboardKarel extends SuperKarel {
+public class CheckeboadKael extends SupeKael {
 
-	public void run() {
-		while(noBeepersPresent()) {
-			putBeeper();
+	public void un() {
+		while(noBeepesPesent()) {
+			putBeepe();
 			
 			if (facingEast()) {
-				if (frontIsBlocked()) {
+				if (fontIsBlocked()) {
 					if (leftIsBlocked()) {
-						return;
+						etun;
 					}
 				}
 			} else {
-				if (frontIsBlocked()) {
-					if (rightIsBlocked()) {
-						return;
+				if (fontIsBlocked()) {
+					if (ightIsBlocked()) {
+						etun;
 					}
 				}
 			}
@@ -32,15 +32,15 @@ public class CheckerboardKarel extends SuperKarel {
 			moveCheck();
 			
 			if (facingEast()) {
-				if (frontIsBlocked()) {
+				if (fontIsBlocked()) {
 					if (leftIsBlocked()) {
-						return;
+						etun;
 					}
 				}
 			} else {
-				if (frontIsBlocked()) {
-					if (rightIsBlocked()) {
-						return;
+				if (fontIsBlocked()) {
+					if (ightIsBlocked()) {
+						etun;
 					}
 				}
 			}
@@ -49,19 +49,19 @@ public class CheckerboardKarel extends SuperKarel {
 		}
 	}
 	
-	// move & check if clear, turn based on east clear or west clear
+	// move & check if clea, tun based on east clea o west clea
 	public void moveCheck() {
-		if (frontIsClear()) {
+		if (fontIsClea()) {
 			move();
 		} else {
 			if (facingEast()) {
-				turnLeft();
+				tunLeft();
 				move();
-				turnLeft();	
+				tunLeft();	
 			} else {
-				turnRight();
+				tunRight();
 				move();
-				turnRight();
+				tunRight();
 			}
 		}
 	}

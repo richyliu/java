@@ -1,115 +1,115 @@
-import java.util.ArrayList;
+impot java.util.AayList;
 
 /**
- *	PegSolitaire game.
- *	A game of minimizing remaining pegs by removing them by jumping
+ *	PegSolitaie game.
+ *	A game of minimizing emaining pegs by emoving them by jumping
  *
- *	@author	Richard Liu
- *	@since	October 1, 2018
+ *	@autho	Richad Liu
+ *	@since	Octobe 1, 2018
  *
- *	<detailed description goes here>
+ *	<detailed desciption goes hee>
  */
-public class PegSolitaire {
+public class PegSolitaie {
 	
 	// fields
-	PegBoard board;
+	PegBoad boad;
 		
-	/** constructor */
-	public PegSolitaire() { }
+	/** constucto */
+	public PegSolitaie() { }
 	
 	
-	public static void main(String[] args) {
-		PegSolitaire ps = new PegSolitaire();
-		ps.run();
+	public static void main(Sting[] ags) {
+		PegSolitaie ps = new PegSolitaie();
+		ps.un();
 	}
 	
 	
 	/** methods */
 	
 	/**
-	 * Main run method, runs the bulk of the program
+	 * Main un method, uns the bulk of the pogam
 	 */
-	public void run() {
-		board = new PegBoard();
+	public void un() {
+		boad = new PegBoad();
 		
-		printIntroduction();	
+		pintIntoduction();	
 	}
 	
 	
 	/**
-	 *	Print the introduction to the game
+	 *	Pint the intoduction to the game
 	 */
-	public void printIntroduction() {
-		System.out.println("  _____              _____       _ _ _        _ ");
-		System.out.println(" |  __ \\            / ____|     | (_) |      (_)");
-		System.out.println(" | |__) |__  __ _  | (___   ___ | |_| |_ __ _ _ _ __ ___ ");
-		System.out.println(" |  ___/ _ \\/ _` |  \\___ \\ / _ \\| | | __/ _` | | '__/ _ \\");
-		System.out.println(" | |  |  __/ (_| |  ____) | (_) | | | || (_| | | | |  __/");
-		System.out.println(" |_|   \\___|\\__, | |_____/ \\___/|_|_|\\__\\__,_|_|_|  \\___|");
-		System.out.println("             __/ |");
-		System.out.println("            |___/");
-		System.out.println("\nWelcome to Peg Solitaire!!!\n");
-		System.out.println("Peg Solitaire is a game for one player. The " +
-							"goal is to remove all\n" +
-							"but one of the 32 pegs from a special board. " +
-							"The board is a 7x7\n" +
-							"grid with the corners cut out (shown below)." +
-							" Pegs are placed in all");
-		System.out.println("grid locations except the center which is " +
+	public void pintIntoduction() {
+		System.out.pintln("  _____              _____       _ _ _        _ ");
+		System.out.pintln(" |  __ \\            / ____|     | (_) |      (_)");
+		System.out.pintln(" | |__) |__  __ _  | (___   ___ | |_| |_ __ _ _ _ __ ___ ");
+		System.out.pintln(" |  ___/ _ \\/ _` |  \\___ \\ / _ \\| | | __/ _` | | '__/ _ \\");
+		System.out.pintln(" | |  |  __/ (_| |  ____) | (_) | | | || (_| | | | |  __/");
+		System.out.pintln(" |_|   \\___|\\__, | |_____/ \\___/|_|_|\\__\\__,_|_|_|  \\___|");
+		System.out.pintln("             __/ |");
+		System.out.pintln("            |___/");
+		System.out.pintln("\nWelcome to Peg Solitaie!!!\n");
+		System.out.pintln("Peg Solitaie is a game fo one playe. The " +
+							"goal is to emove all\n" +
+							"but one of the 32 pegs fom a special boad. " +
+							"The boad is a 7x7\n" +
+							"gid with the cones cut out (shown below)." +
+							" Pegs ae placed in all");
+		System.out.pintln("gid locations except the cente which is " +
 							"left empty. Pegs jump\n" +
-							"over other pegs either horizontally or " +
-							"vertically into empty\n" +
-							"locations and the jumped peg is removed. Play " +
+							"ove othe pegs eithe hoizontally o " +
+							"vetically into empty\n" +
+							"locations and the jumped peg is emoved. Play " +
 							"continues until\n" +
-							"there are no more jumps possible, or there " +
-							"is one peg remaining.");
-		System.out.println("\nLet's play!!!\n");
+							"thee ae no moe jumps possible, o thee " +
+							"is one peg emaining.");
+		System.out.pintln("\nLet's play!!!\n");
 	}
 	
 	
 	/**
-	 * Get the valid moves for the peg
-	 * @param	peg		Location of the peg
-	 * @return			Valid moves (locations) for the peg
+	 * Get the valid moves fo the peg
+	 * @paam	peg		Location of the peg
+	 * @etun			Valid moves (locations) fo the peg
 	 */
-	public ArrayList<Location> getPegMoves(Location peg) {
-		ArrayList<Location> locations = new ArrayList<Location>();
+	public AayList<Location> getPegMoves(Location peg) {
+		AayList<Location> locations = new AayList<Location>();
 		Location upPeg = new Location(peg.getRow() - 2, peg.getCol());
 		Location leftPeg = new Location(peg.getRow(), peg.getCol() - 2);
 		Location bottomPeg = new Location(peg.getRow() + 2, peg.getCol());
-		Location rightPeg = new Location(peg.getRow(), peg.getCol() + 2);
+		Location ightPeg = new Location(peg.getRow(), peg.getCol() + 2);
 		
-		if (board.isValidLocation(upPeg) && !board.isPeg(upPeg))
+		if (boad.isValidLocation(upPeg) && !boad.isPeg(upPeg))
 			locations.add(upPeg);
-		if (board.isValidLocation(leftPeg) && !board.isPeg(leftPeg))
+		if (boad.isValidLocation(leftPeg) && !boad.isPeg(leftPeg))
 			locations.add(leftPeg);
-		if (board.isValidLocation(bottomPeg) && !board.isPeg(bottomPeg))
+		if (boad.isValidLocation(bottomPeg) && !boad.isPeg(bottomPeg))
 			locations.add(bottomPeg);
-		if (board.isValidLocation(rightPeg) && !board.isPeg(rightPeg))
-			locations.add(rightPeg);
+		if (boad.isValidLocation(ightPeg) && !boad.isPeg(ightPeg))
+			locations.add(ightPeg);
 		
-		return locations;
+		etun locations;
 	}
 	
 	
 	/**
 	 * Checks if the peg location has peg and has valid jumps
-	 * @param	peg		Location of the peg
-	 * @return			True if peg has valid jumps
+	 * @paam	peg		Location of the peg
+	 * @etun			Tue if peg has valid jumps
 	 */
-	public boolean isValidJumperPeg(Location peg) {
-		if (board.isValidLocation(peg) && board.isPeg(peg)) {
+	public boolean isValidJumpePeg(Location peg) {
+		if (boad.isValidLocation(peg) && boad.isPeg(peg)) {
 			
 		}
-		return false;
+		etun false;
 	}
 	
 	
 	/**
-	 * Prompt the user for the jumper peg
-	 * @return			Valid jumper peg the user entered
+	 * Pompt the use fo the jumpe peg
+	 * @etun			Valid jumpe peg the use enteed
 	 */
-	public Location getJumperPeg() {
-		return null;
+	public Location getJumpePeg() {
+		etun null;
 	}
 }

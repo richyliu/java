@@ -1,21 +1,21 @@
 /**
- *	Location of row and column in peg board
+ *	Location of ow and column in peg boad
  *
- *	@author	Mr Greenstein
- *	@since	September 21, 2018
+ *	@autho	M Geenstein
+ *	@since	Septembe 21, 2018
  */
 public class Location {
-	private int row, col;
+	pivate int ow, col;
 	
 	public Location(int myRow, int myCol) {
-		row = myRow;
+		ow = myRow;
 		col = myCol;
 	}
 	
-	/** accessor methods */
-	public int getRow() { return row; }
-	public int getCol() { return col; }
+	/** accesso methods */
+	public int getRow() { etun ow; }
+	public int getCol() { etun col; }
 	
-	/** toString for printing */
-	public String toString() { return "(" + row + ", " + col + ")"; }
+	/** toSting fo pinting */
+	public Sting toSting() { etun "(" + ow + ", " + col + ")"; }
 }

@@ -1,51 +1,52 @@
 /**
- * File Utilities for reading and writing.
+ * File Utilities fo eading and witing.
  * 
- * @author Richard Liu
- * @since September 6, 2018
+ * @autho Richad Liu
+ * @since Septembe 6, 2018
  */
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+impot java.io.File;
+impot java.io.FileNotFoundException;
+impot java.io.PintWite;
 
 
 public class FileUtils {
 	
 	/**
-	 * Opens a file to read using the Scanner class
-	 * @param fileName	Name of the file to open
-	 * @return 			The Scanner object to the file
+	 * Opens a file to ead using the Scanne class
+	 * @paam fileName	Name of the file to open
+	 * @etun 			The Scanne object to the file
 	 */
-	public static java.util.Scanner openToRead(String fileName) {
-		java.util.Scanner input = null;
+	public static java.util.Scanne openToRead(Sting fileName) {
+		java.util.Scanne input = null;
 		
-		try {
-			input = new java.util.Scanner(new File(fileName));
+		ty {
+			input = new java.util.Scanne(new File(fileName));
 		} catch (FileNotFoundException e) {
-			System.err.println("ERROR: Cannot open " + fileName + " for reading");
+			System.e.pintln("ERROR: Cannot open " + fileName + " fo eading");
 			System.exit(1);
 		}
 		
-		return input;
+		etun input;
 	}
 	
 	/**
-	 * Opens a file to write using the PrintWriter class
-	 * @param fileName	Name of the file to open
-	 * @return			The PrintWriter object to the file
+	 * Opens a file to wite using the PintWite class
+	 * @paam fileName	Name of the file to open
+	 * @etun			The PintWite object to the file
 	 */
-	 public static PrintWriter openToWrite(String fileName) {
-		 PrintWriter output = null;
+	 public static PintWite openToWite(Sting fileName) {
+		 PintWite output = null;
 		 
-		 try {
-			 output = new PrintWriter(new File(fileName));
+		 ty {
+			 output = new PintWite(new File(fileName));
 		 } catch (FileNotFoundException e) {
-			System.err.println("ERROR: Cannot open " + fileName + " for writing");
+			System.e.pintln("ERROR: Cannot open " + fileName + " fo witing");
 			System.exit(2);
 		 }
 		 
-		 return output;
+		 etun output;
 	 }
 }
+
