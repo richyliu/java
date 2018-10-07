@@ -7,7 +7,10 @@ import java.util.ArrayList;
  *	@author	Richard Liu
  *	@since	October 1, 2018
  *
- *	<detailed description goes here>
+ *	The game starts out with 32 pegs on a plus-shaped board with a hole in the
+ * 	middle. The user selects a peg to jump over another peg and into an empty
+ * 	spot. The peg that was jumped over is removed. The game continues until
+ * 	there are no more pegs to jump.
  */
 public class PegSolitaire {
 	
@@ -116,25 +119,17 @@ public class PegSolitaire {
 		
 		// check in each direction there is a valid peg and empty peg 2 spaces
 		// away
-		if (board.isValidLocation(x-2, y) &&
-			!board.isPeg(x-2, y) &&
-			board.isPeg(x-1, y)
-		)
+		if (board.isValidLocation(x-2, y) && !board.isPeg(x-2, y) &&
+			board.isPeg(x-1, y))
 			locations.add(new Location(x-2, y));
-		if (board.isValidLocation(x+2, y) &&
-			!board.isPeg(x+2, y) &&
-			board.isPeg(x+1, y)
-		)
+		if (board.isValidLocation(x+2, y) && !board.isPeg(x+2, y) &&
+			board.isPeg(x+1, y))
 			locations.add(new Location(x+2, y));
-		if (board.isValidLocation(x, y-2) &&
-			!board.isPeg(x, y-2) &&
-			board.isPeg(x, y-1)
-		)
+		if (board.isValidLocation(x, y-2) && !board.isPeg(x, y-2) &&
+			board.isPeg(x, y-1))
 			locations.add(new Location(x, y-2));
-		if (board.isValidLocation(x, y+2) &&
-			!board.isPeg(x, y+2) &&
-			board.isPeg(x, y+1)
-		)
+		if (board.isValidLocation(x, y+2) && !board.isPeg(x, y+2) &&
+			board.isPeg(x, y+1))
 			locations.add(new Location(x, y+2));
 				
 		return locations;
@@ -171,39 +166,48 @@ public class PegSolitaire {
 	public Location getJumperPeg() {
 		Location validPeg = null;
 		String userStr = "";
-		final int ZERO_ASCII = 48;
+		boolean badInput = true;
 		
 		do {
+			// assume user input is bad
+			badInput = true;
+			
+			// prompt the user for input string
 			userStr = Prompt.getString("Jumper peg - row col (ex. 3 5, q=quit)");
+			
+			// exit if user types "q"
 			if (userStr.equals("q")) {
-				// quit program
+				badInput = false;
 				exit = true;
 			} else {
-				if (
-					// check str is at least 3 chars long
-					userStr.length() == 3 &&
-					// first char should be number between 0 and 9
-					userStr.charAt(0) >= ZERO_ASCII &&
-					userStr.charAt(0) < ZERO_ASCII+10 &&
-					// second char space
-					userStr.charAt(1) == ' ' &&
-					// third char should be number between 0 and 9
-					userStr.charAt(2) >= ZERO_ASCII &&
-					userStr.charAt(2) < ZERO_ASCII+10
-				) {					
-					validPeg = new Location(
-						userStr.charAt(0) - ZERO_ASCII,
-						userStr.charAt(2) - ZERO_ASCII
-					);
-					
-					if (!isValidJumperPeg(validPeg)) {
-						// not valid, ask again
-						System.out.println("Invalid jumper peg: " + validPeg);
-						validPeg = null;
-					}
+				// split string by space
+				String[] parts = userStr.split(" +");
+				int num1 = 0;
+				int num2 = 0;
+				
+				if (parts.length == 2) {
+					try {
+						// try to parse the numbers
+						num1 = Integer.parseInt(parts[0]);
+						num2 = Integer.parseInt(parts[1]);
+						
+						// create peg
+						validPeg = new Location(num1, num2);
+						
+						// check if peg is valid
+						if (!isValidJumperPeg(validPeg)) {
+							// not valid, ask again
+							System.out.println("Invalid jumper peg: " + validPeg);
+							validPeg = null;
+						} else {
+							badInput = false;
+						}
+					// no need to prompt user unnecessarily if they didn't type
+					// a number
+					} catch (NumberFormatException e) {}
 				}
 			}
-		} while(validPeg == null && !exit);
+		} while(badInput);
 		
 		return validPeg;
 	}
@@ -228,7 +232,7 @@ public class PegSolitaire {
 				System.out.println(" " + i + " " + jumpLocs.get(i));
 			}
 			// prompt user to choose
-			int loc = Prompt.getInt("Enter location", 0, jumpLocs.size());
+			int loc = Prompt.getInt("Enter location", 0, jumpLocs.size()-1);
 			jumpPeg(peg, jumpLocs.get(loc));
 		}
 	}
@@ -258,7 +262,9 @@ public class PegSolitaire {
 	 *	Precondition: loc must be a valid location.
 	 *	@param loc		location of peg
 	 */
-	public void putPeg(Location loc) { board.putPeg(loc.getRow(), loc.getCol()); }
+	public void putPeg(Location loc) {
+		board.putPeg(loc.getRow(), loc.getCol());
+	}
 	
 	
 	/**
@@ -266,7 +272,9 @@ public class PegSolitaire {
 	 *	Precondition: loc must be a valid location.
 	 *	@param loc		location of peg
 	 */
-	public void removePeg(Location loc) { board.removePeg(loc.getRow(), loc.getCol()); }
+	public void removePeg(Location loc) {
+		board.removePeg(loc.getRow(), loc.getCol());
+	}
 	
 	
 	/**
@@ -275,5 +283,17 @@ public class PegSolitaire {
 	 *	@param loc		location of peg
 	 *	@return			true if peg in location; false otherwise
 	 */
-	public boolean isPeg(Location loc) { return board.isPeg(loc.getRow(), loc.getCol()); }
+	public boolean isPeg(Location loc) {
+		return board.isPeg(loc.getRow(), loc.getCol());
+	}
+	
+	
+	/**
+	 *	Returns true if row/column location is on the board
+	 *	@param loc		the subject location
+	 *	@return			true if location on the board; false otherwise
+	 */
+	public boolean isValidLocation(Location loc) {
+		return board.isValidLocation(loc.getRow(), loc.getCol());
+	}
 }

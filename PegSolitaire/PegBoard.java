@@ -112,15 +112,6 @@ public class PegBoard {
 	}
 	
 	/**
-	 *	Returns true if row/column location is on the board
-	 *	@param loc		the subject location
-	 *	@return			true if location on the board; false otherwise
-	 */
-	public boolean isValidLocation(Location loc) {
-		return isValidLocation(loc.getRow(), loc.getCol());
-	}
-	
-	/**
 	 *	Put a peg into the location.
 	 *	Precondition: (row, col) must be a valid location.
 	 *	@param row		row to put peg
