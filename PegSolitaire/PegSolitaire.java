@@ -1,8 +1,10 @@
 import java.util.ArrayList;
 
+
 /**
  *	PegSolitaire game.
- *	A game of minimizing remaining pegs by removing them by jumping
+ *	A game of minimizing remaining pegs by jumping pegs over other pegs to
+ * 	remove them.
  *
  *	@author	Richard Liu
  *	@since	October 1, 2018
@@ -14,7 +16,8 @@ import java.util.ArrayList;
  */
 public class PegSolitaire {
 	
-	// fields
+	/** Fields */
+	
 	// board stores the pegs
 	PegBoard board;
 	// exit the game if true
@@ -27,6 +30,10 @@ public class PegSolitaire {
 	}
 	
 	
+	/**
+	 * Main method, ran by the interpreter at the start
+	 * @param args	Command line arguments (not used)
+	 */
 	public static void main(String[] args) {
 		PegSolitaire ps = new PegSolitaire();
 		ps.run();
@@ -41,29 +48,23 @@ public class PegSolitaire {
 	public void run() {
 		board = new PegBoard();
 		
+		// print the introduction
 		printIntroduction();
 		
 		while(!exit) {
+			// prints the current state of the board
 			board.printBoard();
+			// prompts the user to enter a peg and checks if the peg is valid
 			Location peg = getJumperPeg();
 			
-			// peg might be null if user exits
-			if (peg != null)
+			// if the user is not trying to exit the game
+			if (!exit)
+				// jump the chosen peg and remove the inbetween peg
 				jumpChoosePeg(peg);
-
-            // check if there are any remaining moves. if not, exit the game
-            // start by assuming no valid pegs
-            boolean noValid = true;
-
-            for (int row = 0; row < 7 && noValid; row++)
-                for (int col = 0; col < 7 && noValid; col++)
-                    // once a valid peg is found, exit the loop
-                    if (isValidJumperPeg(row, col))
-                        noValid = false;
-
-            // indeed no valid pegs, exit the game
-            if (noValid)
-                exit = true;
+			
+			// exit the game if the game is over
+			if (isGameOver())
+				exit = true;
 		}
 
         // print the board once more
@@ -108,6 +109,7 @@ public class PegSolitaire {
 	
 	/**
 	 * Get the valid moves for the peg
+	 * Precondition: peg is on the board
 	 * @param	peg		Location of the peg
 	 * @return			Valid moves (locations) for the peg
 	 */
@@ -148,6 +150,24 @@ public class PegSolitaire {
 	}
 	
 	
+	
+	/**
+	 * Checks if game over by checking if there are any possible moves remaining
+	 * @return		True if game over and no more possible moves left
+	 */
+	public boolean isGameOver() {
+		// Check if there are any remaining moves. If not, game over
+		for (int row = 0; row < 7; row++)
+			for (int col = 0; col < 7; col++)
+				// once a valid peg is found, exit the loop
+				if (isValidJumperPeg(row, col))
+					return false;
+
+		// haven't found a peg with which the game can continue, so game over
+		return true;
+	}
+	
+	
 	/**
 	 * Checks if the peg location has peg and has valid jumps
 	 * @param x		X location of the peg
@@ -161,7 +181,7 @@ public class PegSolitaire {
 	
 	/**
 	 * Prompt the user for the jumper peg
-	 * @return			Valid jumper peg the user entered
+	 * @return		Valid jumper peg the user entered
 	 */
 	public Location getJumperPeg() {
 		Location validPeg = null;
@@ -221,6 +241,7 @@ public class PegSolitaire {
 	 * @param	peg		Location of the peg to jump from
 	 */
 	public void jumpChoosePeg(Location peg) {
+		// possible jump locations for the peg
 		ArrayList<Location> jumpLocs = getPegMoves(peg);
 		
 		if (jumpLocs.size() == 1) {
@@ -252,8 +273,11 @@ public class PegSolitaire {
 		int dx = (from.getRow() + to.getRow())/2;
 		int dy = (from.getCol() + to.getCol())/2;
 		
+		// remove the peg we jumped from
 		board.removePeg(from.getRow(), from.getCol());
+		// put a peg where we jump to
 		board.putPeg(to.getRow(), to.getCol());
+		// remove the peg inbetween
 		board.removePeg(dx, dy);
 	}
 }
