@@ -88,11 +88,15 @@ public class HTMLUtilities {
 		if (c0 == '<')
 			return false;
 		
-		if (!isAlphaHyphen(c0) && isAlphaHyphen(c1))
+		if (!isAlphaHyphen(c0) && isAlphaHyphen(c1)) {
 			return true;
+		}
 		
 		if (!isPunctuation(c0) && isPunctuation(c1))
 			return true;
+		
+		if (c0 == '-' && Character.isDigit(c1))
+			return false;
 		
 		if (!Character.isDigit(c0) && Character.isDigit(c1))
 			return true;
@@ -119,13 +123,22 @@ public class HTMLUtilities {
 		
 		if (inTag) return false;
 		
-		if (isAlphaHyphen(c1) && !isAlphaHyphen(c2))
+		if (Character.isDigit(c0) && c1 == 'e')
+			return false;
+			
+		if (Character.isLetter(c1) && !isAlphaHyphen(c2))
 			return true;
 		
 		if (c1 == '-' && isAlphaHyphen(c2))
 			return false;
 		
-		if (Character.isDigit(c1) && c2 == '.')
+		if (Character.isDigit(c1) && (c2 == '.' || c2 == 'e'))
+			return false;
+		
+		if (Character.isDigit(c0) && c1 == 'e')
+			return false;
+		
+		if (c1 == '-' && Character.isDigit(c2))
 			return false;
 		
 		if (Character.isDigit(c0) && Character.isDigit(c2))
@@ -135,6 +148,9 @@ public class HTMLUtilities {
 			return true;
 		
 		if (Character.isDigit(c1) && !Character.isDigit(c2))
+			return true;
+		
+		if (Character.isDigit(c0) && !Character.isDigit(c1) && !Character.isDigit(c2))
 			return true;
 		
 		return false;
