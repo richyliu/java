@@ -76,6 +76,10 @@ no! N K
 no <C-g> <C-d>
 no <C-i> <C-u>
 
+" Common double bindings
+no gg dd
+no tf gt
+
 
 " Disable all kepmaps and return to normal
 " :call Disable()

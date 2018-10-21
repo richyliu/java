@@ -15,49 +15,84 @@ public class HTMLUtilities {
 	 *	@return				the String array of tokens
 	 */
 	public String[] tokenizeHTMLString(String inStr) {
-		String str = inStr.trim();	// remove surrounding space, ensure it
-									// starts and ends with a token
+        // ensure only 1 space surround string on either sides
+		String str = " " + inStr.trim() + " ";
 		
 		// make the size of the array large to start
 		String[] tokens = new String[10000];
 		// current index of token
 		int tokenIndex = 0;
 		// current token
-		String token = "";
+		String word = "";
 		// currently on a token, add characters to token
 		boolean inToken = false;
-		// if current token is an html tag
-		boolean inTag = false;
+        // currently on a HTML tag (special type of token)
+        boolean inTag = false;
 		
-		str = " " + str + " ";
 		
 		// loop through input string
 		for (int i = 1; i < str.length()-1; i++) {
+            // previous character
+            char p = str.charAt(i-1);
+            // current character
+            char c = str.charAt(i);
+            // next character
+            char n = str.charAt(i+1);
+            
 			// start of tag
-			if (!inToken && isTokenStart(str, i)) {
-				inToken = true;
-				if (str.charAt(i) == '<')
-					inTag = true;
+			if (!inToken) {
+                // html tag starts with '<'
+                if (c == '<') {
+				    inToken = true;
+                    inTag = true;
+                }
+                // all other tokens (besides html tags)
+                if (
+                        // previous character is a '>' or space
+                        (p == '>' || Character.isWhitespace(p)) &&
+                        // starting character can't be a space
+                        !Character.isWhitespace(c)) {
+				    inToken = true;
+                }
 			}
 			// end of tag, add to tokens
-			if (inToken && isTokenEnd(str, i, inTag)) {
+			if (inToken && (
+                        // whitespace, end of non-html tag
+                        (!inTag && Character.isWhitespace(n)) ||
+                        // html tag ends
+                        c == '>' ||
+                        // next character is '<', word has to end 
+                        n == '<'
+                    )) {
 				// add last '>' character
+				word += c;
+				
+                // html token, directly add to array
+                if (inTag) {
+                    tokens[tokenIndex] = word;
+                    tokenIndex++;
+                // word, may contain more than 1 token
+                } else {
+                    // tokenize word into individual tokens
+                    String[] wordTokens = tokenizeWord(word);
+                    // add to tokens array
+                    for (int j = 0; j < wordTokens.length; j++)
+                        tokens[tokenIndex + j] = wordTokens[j];
+                    // ensure index stays synced
+                    tokenIndex += wordTokens.length;
+                }
+
+                // reset tags and words
 				inToken = false;
 				inTag = false;
-				token += str.charAt(i);
-				
-				// add to tokens and reset
-				tokens[tokenIndex] = token;
-				tokenIndex++;
-				token = "";
+				word = "";
 			}
 			
 			// if in a token right now, add character
-			if (inToken) {
-				token += str.charAt(i);
-			}
+			if (inToken)
+				word += c;
 		}
-		
+        // done with looping through string
 		
 		// create a smaller array of appropriate size
 		String[] result = shrinkArray(tokens, tokenIndex);
@@ -65,107 +100,28 @@ public class HTMLUtilities {
 		// return the correctly sized array
 		return result;
 	}
-	
-	
-	/**
-	 * Checks if a token starts at the given index
-	 * Precondition: Not currently in a token
-	 * @param str	String to look in
-	 * @param i		Index of start of token to check
-	 * @return		If true a token starts at index i
-	 */
-	public boolean isTokenStart(String str, int i) {
-		char c0 = str.charAt(i-1);
-		char c1 = str.charAt(i);
-		char c2 = str.charAt(i+1);
-		
-		if (c1 == '<')
-			return true;
-		
-		if (c0 == '>' && Character.isLetter(c1))
-			return true;
-		
-		if (c0 == '<')
-			return false;
-		
-		if (!isAlphaHyphen(c0) && isAlphaHyphen(c1)) {
-			return true;
-		}
-		
-		if (!isPunctuation(c0) && isPunctuation(c1))
-			return true;
-		
-		if (c0 == '-' && Character.isDigit(c1))
-			return false;
-		
-		if (!Character.isDigit(c0) && Character.isDigit(c1))
-			return true;
-		
-		return false;
-	}
-	
-	
-	/**
-	 * Checks if a token ends given the current letter and the next letter
-	 * Precondition: Not currently in a token
-	 * @param str	String to look in
-	 * @param i		Index of start of token to check
-	 * @param inTag	If currently in a HTML tag
-	 * @return		If true a token ends at letter c
-	 */
-	public boolean isTokenEnd(String str, int i, boolean inTag) {
-		char c0 = str.charAt(i-1);
-		char c1 = str.charAt(i);
-		char c2 = str.charAt(i+1);
-		
-		if (inTag && c1 == '>')
-			return true;
-		
-		if (inTag) return false;
-		
-		if (Character.isDigit(c0) && c1 == 'e')
-			return false;
-			
-		if (Character.isLetter(c1) && !isAlphaHyphen(c2))
-			return true;
-		
-		if (c1 == '-' && isAlphaHyphen(c2))
-			return false;
-		
-		if (Character.isDigit(c1) && (c2 == '.' || c2 == 'e'))
-			return false;
-		
-		if (Character.isDigit(c0) && c1 == 'e')
-			return false;
-		
-		if (c1 == '-' && Character.isDigit(c2))
-			return false;
-		
-		if (Character.isDigit(c0) && Character.isDigit(c2))
-			return false;
-		
-		if (isPunctuation(c1) && !isPunctuation(c2))
-			return true;
-		
-		if (Character.isDigit(c1) && !Character.isDigit(c2))
-			return true;
-		
-		if (Character.isDigit(c0) && !Character.isDigit(c1) && !Character.isDigit(c2))
-			return true;
-		
-		return false;
-	}
-	
-	
-	/**
-	 * Checks if a character is an alpha character (upper or lowercase "a" to
-	 * "z") or a hypen
-	 * @param c		Character to check
-	 * @return		True if character is alpha or hypen
-	 */
-	public boolean isAlphaHyphen(char c) {
-		return Character.isLetter(c) || c == '-';
-	}
+
+
+    /**
+     * Tokenize the word into individual tokens (a word is a string of text
+     * with spaces around it). The word cannot be an HTML tag.
+     * @param word  The input word to separate
+     * @return      The tokens in the word
+     */
+    public String[] tokenizeWord(String word) {
+        // set tokens array to only word initially
+        String[] tokens = new String[]{ word };
+        // remove extraneous whitespace
+        word = word.trim();
+
+        // if ends in punctuation and is longer than 1 character, put that as seperate token
+        if (isPunctuation(word.charAt(word.length() - 1)) && word.length() > 1) {
+            // set the word as a separate token as the ending punctuation 
+            tokens = new String[]{ word.substring(0, word.length()-1) , "" + word.charAt(word.length()-1) };
+        }
+
+        return tokens;
+    }
 	
 	
 	/**
@@ -187,9 +143,8 @@ public class HTMLUtilities {
 	 */
 	public String[] shrinkArray(String[] arr, int len) {
 		String[] ret = new String[len];
-		for (int i = 0; i < len; i++) {
+		for (int i = 0; i < len; i++)
 			ret[i] = arr[i];
-		}
 		
 		return ret;
 	}
@@ -209,5 +164,4 @@ public class HTMLUtilities {
 		}
 		System.out.println();
 	}
-
 }
