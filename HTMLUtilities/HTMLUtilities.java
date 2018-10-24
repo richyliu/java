@@ -6,6 +6,21 @@
  */
 public class HTMLUtilities {
 
+	// NONE = not nested in a block, COMMENT = inside a comment block 
+	// PREFORMAT = inside a pre-format block 
+	private enum TokenState { NONE, COMMENT, PREFORMAT }; 
+	// the current tokenizer state
+	private TokenState state;      
+	
+	
+	/**
+	 * Constructor, initialize fields with defaults.
+	 */
+	public HTMLUtilities() {
+		state = TokenState.NONE;
+	}
+	
+
 	/**
 	 *	Break the HTML string into tokens. The array returned is
 	 *	exactly the size of the number of tokens in the HTML string.
@@ -30,9 +45,28 @@ public class HTMLUtilities {
 		// currently on a HTML tag (special type of token)
 		boolean inTag = false;
 		
+		// return the current string if in a pre tag
+		String ret = checkPre(inStr);
+		// don't return if ret is null
+		if (ret != null)
+			return new String[]{ ret };
+		
 		
 		// loop through input string, except for first and last space
 		for (int i = 1; i < str.length()-1; i++) {
+			// check if comment begins here
+			if (state == TokenState.NONE &&
+				str.length() >= i+4 &&
+				str.substring(i, i+4).equals("<!--")) {
+				state = TokenState.COMMENT;
+			}
+			// check if comment ends here
+			if (state == TokenState.COMMENT &&
+				i >= 3 &&
+				str.substring(i-2, i+1).equals("-->")) {
+				state = TokenState.NONE;
+			}
+			
 			// previous character
 			char p = str.charAt(i-1);
 			// current character
@@ -40,8 +74,8 @@ public class HTMLUtilities {
 			// next character
 			char n = str.charAt(i+1);
 			
-			// start of tag
-			if (!inWord) {
+			// start of tag only if in normal mode
+			if (state == TokenState.NONE && !inWord) {
 				// html tag starts with '<'
 				if (c == '<') {
 					inWord = true;
@@ -56,8 +90,8 @@ public class HTMLUtilities {
 					inWord = true;
 				}
 			}
-			// end of tag, add to tokens
-			if (inWord && (
+			// end of tag, add to tokens only if in normal mode
+			if (state == TokenState.NONE && inWord && (
 						// whitespace, end of non-html tag
 						(!inTag && Character.isWhitespace(n)) ||
 						// html tag ends
@@ -126,6 +160,33 @@ public class HTMLUtilities {
 		}
 
 		return tokens;
+	}
+	
+	
+	/**
+	 * Checks if the current line begins or ends a preformatted text. If
+	 * currently in a preformatted tag, will return the line.
+	 * @param line	Current line that is being parsed
+	 * @return		Line if in preformatted text, otherwise null
+	 */
+	private String checkPre(String line) {
+		// check if this line has pre (start of end of pre tag)
+		if (state == TokenState.NONE && line.trim().equals("<pre>")) {
+			state = TokenState.PREFORMAT;
+			// only 1 tag, that is the start pre tag
+			return "<pre>";
+		}
+		if (state == TokenState.PREFORMAT && line.trim().equals("</pre>")) {
+			state = TokenState.NONE;
+			// only 1 tag, that is the end pre tag
+			return "</pre>";
+		}
+		
+		// use entire line as token if in pre tag
+		if (state == TokenState.PREFORMAT)
+			return line;
+		
+		return null;
 	}
 	
 	
