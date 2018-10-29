@@ -10,7 +10,9 @@ public class HTMLUtilities {
 	// PREFORMAT = inside a pre-format block 
 	private enum TokenState { NONE, COMMENT, PREFORMAT }; 
 	// the current tokenizer state
-	private TokenState state;      
+	private TokenState state;
+	// punctuation characterss
+	private final char[] PUNCTUATION = new char[]{'.', ',', ';', ':', '(', ')', '?', '!', '=', '&', '~', '+', '-'};
 	
 	
 	/**
@@ -145,19 +147,97 @@ public class HTMLUtilities {
 	 */
 	public String[] tokenizeWord(String word) {
 		// set tokens array to only word initially
-		String[] tokens = new String[]{ word };
+		String[] tokens = new String[100];
+		int tokenIndex = 0;
+		
 		// remove extraneous whitespace
 		word = word.trim();
-		// length of the word except the last character
-		int exceptLast = word.length() - 1;
-		// last character in the word
-		char last = word.charAt(exceptLast);
-
-		// if longer than 1 character and ends in punctuation
-		if (word.length() > 1 && isPunctuation(last)) {
-			// set 2 tokens, word and ending punctuation
-			tokens = new String[]{ word.substring(0, exceptLast) , "" + last };
+		boolean inNumber = false;
+		String token = "";
+		
+		// whether a token has been added already in 1 run of the loop
+		// prevent duplicate adding
+		boolean added = false;
+		
+		// loop through string
+		for (int i = 0; i < word.length(); i++) {
+			added = false;
+			
+			// previous, current, and next characters
+			char prev, cur, next;
+			prev = cur = next = ' ';
+			
+			// ensure no out of bounds
+			if (i > 0)
+				prev = word.charAt(i-1);
+			cur = word.charAt(i);
+			if (i < word.length()-1)
+				next = word.charAt(i+1);
+			
+			// check if number starts here
+			if (!inNumber && !added && (
+				// currently on a digit
+				Character.isDigit(cur) ||
+				// next is a digit and currently on negative sign
+				(Character.isDigit(next) && cur == '-')
+				// nubmer followed by negative is a new number
+			) || inNumber && (cur == '-' && Character.isDigit(prev))) {
+				// add to tokens array				
+				if (token.length() > 0) {
+					tokens[tokenIndex] = token;
+					tokenIndex++;
+					token = "";
+				}
+				added = true;
+				inNumber = true;
+			}
+			
+			// check if number ends here
+			if (inNumber && !added && (
+				// currently on a dot but next character not a digit
+				(cur == '.' && !Character.isDigit(next)) ||
+				// on a e and next character isn't negative or digit
+				(cur == 'e' && next != '-' && !Character.isDigit(next)) ||
+				// this is anything but digit, e, negative sign, or period
+				(!Character.isDigit(cur) && cur != 'e' && cur != '-' && cur != '.')
+			)) {
+				// add to tokens array
+				tokens[tokenIndex] = token;
+				tokenIndex++;
+				token = "";
+				added = true;
+				inNumber = false;
+			}
+			
+			// check if on a punctuation
+			if (!inNumber && !added && (
+				// this is character or previous is character
+				(isPunctuation(cur) || isPunctuation(prev))) &&
+				// not a character-dash-character sequence (ignore as punctuation)
+				!(cur == '-' && Character.isLetter(prev) &&
+					Character.isLetter(next)) &&
+				// not a character-dash-character sequence on the previous 3 chars
+				!(prev == '-' && Character.isLetter(cur) && i > 1 &&
+					Character.isLetter(word.charAt(i-2)))
+			) {
+				// add to tokens array
+				if (token.length() > 0) {
+					tokens[tokenIndex] = token;
+					tokenIndex++;
+					token = "";
+				}
+				added = true;
+			}
+			
+			// add every character to a token
+			token += cur;
 		}
+		// add last token to the array
+		tokens[tokenIndex] = token;
+		tokenIndex++;
+		
+		// shrink array to appropriate size
+		tokens = shrinkArray(tokens, tokenIndex);
 
 		return tokens;
 	}
@@ -197,7 +277,10 @@ public class HTMLUtilities {
 	 * @return		True if character is a punctuation
 	 */
 	public boolean isPunctuation(char c) {
-		return ".,;:()?!=&~+-".indexOf(c) > -1;
+		for (int i = 0; i < PUNCTUATION.length; i++)
+			if (c == PUNCTUATION[i])
+				return true;
+		return false;
 	}
 	
 	
