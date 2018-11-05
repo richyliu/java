@@ -39,7 +39,6 @@ public class HTMLRender {
 	
 	private enum TextState {
 		TEXT,
-		QUOTATION,
 		BOLD,
 		ITALIC,
 		H1,
@@ -108,6 +107,7 @@ public class HTMLRender {
 			String line = input.nextLine();
 			curTokens = util.tokenizeHTMLString(line);
 			
+			// add tokens of this line to big tokens array
 			for (int i = 0; i < curTokens.length; i++) {
 				tokens[index] = curTokens[i];
 				index++;
@@ -116,6 +116,7 @@ public class HTMLRender {
 		
 		input.close();
 		
+		// shrink array to appropriate size
 		tokens = shrinkArray(tokens, index);
 	}
 	
@@ -125,18 +126,22 @@ public class HTMLRender {
 		readFile();
 		
 		//for (int i = 0; i < tokens.length; i++)
-		//	System.out.printf("[%3d]: %-20s %s", i, tokens[i], i % 4 == 3 ? "\n" : "");
+		//	System.out.printf("[%2d]: %s\n", i, tokens[i]);
 		
 		render();
 	}
 	
 	
 	public void render() {
+		// previous, current and next token
 		String prev = "";
-		String next = "";
 		String cur = "";
+		String next = "";
+		// token that will be printed to the browser
 		String printToken = "";
+		// current character in the line
 		int lineChar = 0;
+		// maximum characters on this line
 		int maxChars = 80;
 		
 		// for now skip html and body tokens
@@ -145,7 +150,7 @@ public class HTMLRender {
 			cur = tokens[i];
 			next = tokens[i+1];
 			
-			
+			// handle ending tags first
 			switch(cur.toLowerCase()) {
 				case "</h1>":
 				case "</h2>":
@@ -154,14 +159,17 @@ public class HTMLRender {
 				case "</h5>":
 				case "</h6>":
 				case "</p>":
+				case "</pre>":
+					// reset to normal text mode
 					maxChars = 80;
 					lineChar = 0;
 					browser.println();
+					// print extra println if not a block tag
 					if (!isBlockTag(next))
 						browser.println();
-				case "</pre>":
 				case "</i>":
 				case "</b>":
+					// reset state to text
 					state = TextState.TEXT;
 					break;
 				case "</q>":
@@ -169,18 +177,21 @@ public class HTMLRender {
 					break;
 			}
 			
+			// go to new line if current line exceeds maximum chars
 			if (lineChar >= maxChars) {
 				browser.println();
 				lineChar = 0;
 			}
 			
+			// print if it's not a tag
 			if (!isTag(cur)) {
 				printToken = cur;
+				// add space if next token is not a punctuation
 				if (next.length() > 1 || !util.isPunctuation(next.charAt(0)))
 					printToken += ' ';
 				
+				// print token based on state
 				switch(state) {
-					case QUOTATION:
 					case TEXT:
 						browser.print(printToken);
 						break;
@@ -213,12 +224,16 @@ public class HTMLRender {
 						browser.println();
 						break;
 				}
+				
+				// add to lineChar based on printed length
+				lineChar += printToken.length();
 			}
 			
-			lineChar += printToken.length();
 			
+			// handle starting tags
 			switch(cur.toLowerCase()) {
 				case "<br>":
+					// break line, reset lineChar
 					lineChar = 0;
 					browser.printBreak();
 					break;
@@ -226,10 +241,13 @@ public class HTMLRender {
 					browser.printHorizontalRule();
 					break;
 				case "<p>":
+					// set to text mode
 					state = TextState.TEXT;
+					// limit maxChars
 					maxChars = 80;
 					lineChar = 0;
 					browser.println();
+					// print extra println if not a block tag
 					if (!isBlockTag(prev))
 						browser.println();
 					break;
@@ -240,7 +258,6 @@ public class HTMLRender {
 					state = TextState.ITALIC;
 					break;
 				case "<q>":
-					state = TextState.QUOTATION;
 					browser.print("\"");
 					break;
 				case "<pre>":
@@ -248,6 +265,7 @@ public class HTMLRender {
 					break;
 				case "<h1>":
 					state = TextState.H1;
+					// different max chars for headers
 					maxChars = 40;
 					lineChar = 0;
 					browser.println();
@@ -285,7 +303,7 @@ public class HTMLRender {
 					browser.println();
 					if (!isBlockTag(prev))
 						browser.println();
-					break;
+					continue;
 				case "<h6>":
 					state = TextState.H6;
 					maxChars = 120;
@@ -313,6 +331,11 @@ public class HTMLRender {
 		return ret;
 	}
 	
+	/**
+	 * Check if a string is an HTML tag. A tag starts with "<" and ends with ">"
+	 * @param str	To check if it's an HTML tag
+	 * @return		True if str is an HTML tag
+	 */
 	private boolean isTag(String str) {
 		return
 			str.length() > 2 &&
@@ -320,9 +343,16 @@ public class HTMLRender {
 			str.charAt(str.length()-1) == '>';
 	}
 	
+	/**
+	 * Check if a tag is a block tag. Block tags begin and end with a newline.
+	 * @param str	To check if it's a block tag
+	 * @return		True if str is a block tag
+	 */
 	private boolean isBlockTag(String str) {
 		if (isTag(str)) {
+			// lowercase to avoid checking case
 			switch (str.toLowerCase()) {
+				// starting and ending tags
 				case "<p>":
 				case "<h1>":
 				case "<h2>":
