@@ -38,7 +38,7 @@ public class HTMLRender {
 	private String fileName;
 	
 	private enum TextState {
-		PARAGRAPH,
+		TEXT,
 		QUOTATION,
 		BOLD,
 		ITALIC,
@@ -49,10 +49,12 @@ public class HTMLRender {
 		H5,
 		H6,
 		PRE,
-		NONE
+		NONE,
 	};
 	// type of text currently parsing
 	private TextState state;
+	
+	private HTMLUtilities util;
 	
 		
 	public HTMLRender(String fileName) {
@@ -65,7 +67,9 @@ public class HTMLRender {
 		render = new SimpleHtmlRenderer();
 		browser = render.getHtmlPrinter();
 		
-		state = TextState.NONE;
+		state = TextState.TEXT;
+		
+		util = new HTMLUtilities();
 	}
 	
 	
@@ -93,7 +97,6 @@ public class HTMLRender {
 	 */
 	public void readFile() {
 		Scanner input = null;
-		HTMLUtilities util = new HTMLUtilities();
 		int index = 0;
 		String[] curTokens;
 		
@@ -129,68 +132,170 @@ public class HTMLRender {
 	
 	
 	public void render() {
+		String prev = "";
+		String next = "";
 		String cur = "";
+		String printToken = "";
+		int lineChar = 0;
+		int maxChars = 80;
 		
 		// for now skip html and body tokens
 		for (int i = 2; i < tokens.length - 2; i++) {
+			prev = tokens[i-1];
 			cur = tokens[i];
-			
-			if (cur.equalsIgnoreCase("<p>"))
-				state = TextState.PARAGRAPH;
-			else if (cur.equalsIgnoreCase("</p>"))
-				state = TextState.NONE;
+			next = tokens[i+1];
 			
 			
-			switch(state) {
-				case PARAGRAPH:
-					browser.print(cur + ' ');
+			switch(cur.toLowerCase()) {
+				case "</h1>":
+				case "</h2>":
+				case "</h3>":
+				case "</h4>":
+				case "</h5>":
+				case "</h6>":
+				case "</p>":
+					maxChars = 80;
+					lineChar = 0;
+					browser.println();
+					if (!isBlockTag(next))
+						browser.println();
+				case "</pre>":
+				case "</i>":
+				case "</b>":
+					state = TextState.TEXT;
 					break;
-				case BOLD:
-					browser.printBold(cur);
+				case "</q>":
+					browser.print("\"");
+					break;
+			}
+			
+			if (lineChar >= maxChars) {
+				browser.println();
+				lineChar = 0;
+			}
+			
+			if (!isTag(cur)) {
+				printToken = cur;
+				if (next.length() > 1 || !util.isPunctuation(next.charAt(0)))
+					printToken += ' ';
+				
+				switch(state) {
+					case QUOTATION:
+					case TEXT:
+						browser.print(printToken);
+						break;
+					case BOLD:
+						browser.printBold(printToken);
+						break;
+					case ITALIC:
+						browser.printItalic(printToken);
+						break;
+					case H1:
+						browser.printHeading1(printToken);
+						break;
+					case H2:
+						browser.printHeading2(printToken);
+						break;
+					case H3:
+						browser.printHeading3(printToken);
+						break;
+					case H4:
+						browser.printHeading4(printToken);
+						break;
+					case H5:
+						browser.printHeading5(printToken);
+						break;
+					case H6:
+						browser.printHeading6(printToken);
+						break;
+					case PRE:
+						browser.printPreformattedText(cur);
+						browser.println();
+						break;
+				}
+			}
+			
+			lineChar += printToken.length();
+			
+			switch(cur.toLowerCase()) {
+				case "<br>":
+					lineChar = 0;
+					browser.printBreak();
+					break;
+				case "<hr>":
+					browser.printHorizontalRule();
+					break;
+				case "<p>":
+					state = TextState.TEXT;
+					maxChars = 80;
+					lineChar = 0;
+					browser.println();
+					if (!isBlockTag(prev))
+						browser.println();
+					break;
+				case "<b>":
+					state = TextState.BOLD;
+					break;
+				case "<i>":
+					state = TextState.ITALIC;
+					break;
+				case "<q>":
+					state = TextState.QUOTATION;
+					browser.print("\"");
+					break;
+				case "<pre>":
+					state = TextState.PRE;
+					break;
+				case "<h1>":
+					state = TextState.H1;
+					maxChars = 40;
+					lineChar = 0;
+					browser.println();
+					if (!isBlockTag(prev))
+						browser.println();
+					break;
+				case "<h2>":
+					state = TextState.H2;
+					maxChars = 40;
+					lineChar = 0;
+					browser.println();
+					if (!isBlockTag(prev))
+						browser.println();
+					break;
+				case "<h3>":
+					state = TextState.H3;
+					maxChars = 50;
+					lineChar = 0;
+					browser.println();
+					if (!isBlockTag(prev))
+						browser.println();
+					break;
+				case "<h4>":
+					state = TextState.H4;
+					maxChars = 60;
+					lineChar = 0;
+					browser.println();
+					if (!isBlockTag(prev))
+						browser.println();
+					break;
+				case "<h5>":
+					state = TextState.H5;
+					maxChars = 80;
+					lineChar = 0;
+					browser.println();
+					if (!isBlockTag(prev))
+						browser.println();
+					break;
+				case "<h6>":
+					state = TextState.H6;
+					maxChars = 120;
+					lineChar = 0;
+					browser.println();
+					if (!isBlockTag(prev))
+						browser.println();
 					break;
 			}
 		}
-		
-		/*
-		// Sample renderings from HtmlPrinter class
-		
-		// Print plain text without line feed at end
-		browser.print("First line");
-		
-		// Print line feed
-		browser.println();
-		
-		// Print bold words and plain space without line feed at end
-		browser.printBold("bold words");
-		browser.print(" ");
-		
-		// Print italic words without line feed at end
-		browser.printItalic("italic words");
-		
-		// Print horizontal rule across window (includes line feed before and after)
-		browser.printHorizontalRule();
-		
-		// Print words, then line feed (printBreak)
-		browser.print("A couple of words");
-		browser.printBreak();
-		browser.printBreak();
-		
-		// Print a double quote
-		browser.print("\"");
-		
-		// Print Headings 1 through 6 (Largest to smallest)
-		browser.printHeading1("Heading1");
-		browser.printHeading2("Heading2");
-		browser.printHeading3("Heading3");
-		browser.printHeading4("Heading4");
-		browser.printHeading5("Heading5");
-		browser.printHeading6("Heading6");
-		
-		// Print pre-formatted text (optional)
-		browser.printPreformattedText("Preformat Monospace\tfont");
-		browser.printBreak();
-		browser.print("The end");
-		*/
 	}
 	
 	
@@ -206,6 +311,39 @@ public class HTMLRender {
 			ret[i] = arr[i];
 		
 		return ret;
+	}
+	
+	private boolean isTag(String str) {
+		return
+			str.length() > 2 &&
+			str.charAt(0) == '<' &&
+			str.charAt(str.length()-1) == '>';
+	}
+	
+	private boolean isBlockTag(String str) {
+		if (isTag(str)) {
+			switch (str.toLowerCase()) {
+				case "<p>":
+				case "<h1>":
+				case "<h2>":
+				case "<h3>":
+				case "<h4>":
+				case "<h5>":
+				case "<h6>":
+				case "</p>":
+				case "</h1>":
+				case "</h2>":
+				case "</h3>":
+				case "</h4>":
+				case "</h5>":
+				case "</h6>":
+					return true;
+				default:
+					return false;
+			}
+		} else {
+			return false;
+		}
 	}
 	
 }
