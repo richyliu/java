@@ -121,17 +121,21 @@ public class HTMLRender {
 	}
 	
 	
+	/**
+	 * Main runner method, called by the main method
+	 */
 	public void run() {
 		// read file
 		readFile();
 		
-		//for (int i = 0; i < tokens.length; i++)
-		//	System.out.printf("[%2d]: %s\n", i, tokens[i]);
-		
+		// draw the html file contents to the "browser"
 		render();
 	}
 	
 	
+	/**
+	 * Render the HTML file using the tokens array and the browser
+	 */
 	public void render() {
 		// previous, current and next token
 		String prev = "";
@@ -144,13 +148,16 @@ public class HTMLRender {
 		// maximum characters on this line
 		int maxChars = 80;
 		
+		
+		/* Loop over tokens, parse each one */
+		
 		// for now skip html and body tokens
 		for (int i = 2; i < tokens.length - 2; i++) {
 			prev = tokens[i-1];
 			cur = tokens[i];
 			next = tokens[i+1];
 			
-			// handle ending tags first
+			/* Handle ending tags first */
 			switch(cur.toLowerCase()) {
 				case "</h1>":
 				case "</h2>":
@@ -160,13 +167,11 @@ public class HTMLRender {
 				case "</h6>":
 				case "</p>":
 				case "</pre>":
-					// reset to normal text mode
+					// reset to normal text length
 					maxChars = 80;
 					lineChar = 0;
-					browser.println();
-					// print extra println if not a block tag
-					if (!isBlockTag(next))
-						browser.println();
+					// needs break to separate text from the other blocks
+					browser.printBreak();
 				case "</i>":
 				case "</b>":
 					// reset state to text
@@ -177,20 +182,31 @@ public class HTMLRender {
 					break;
 			}
 			
-			// go to new line if current line exceeds maximum chars
-			if (lineChar >= maxChars) {
+			/* Wrap around to new line */
+			if (
+				// current line exceeds maximum chars
+				lineChar >= maxChars
+				// and don't break punctuation
+				&& !(cur.length() == 1 && isPunctuation(cur.charAt(0)))
+			) {
 				browser.println();
 				lineChar = 0;
 			}
 			
-			// print if it's not a tag
+			/* Print the token if it isn't a tag*/
 			if (!isTag(cur)) {
 				printToken = cur;
-				// add space if next token is not a punctuation
-				if (next.length() > 1 || !util.isPunctuation(next.charAt(0)))
-					printToken += ' ';
+				// add space before
+				if (
+					// if not on a punctuation
+					!(cur.length() == 1 && isPunctuation(cur.charAt(0)))
+					// and previous was not a quote tag
+					&& !prev.equalsIgnoreCase("<q>")
+				) {
+					printToken = ' ' + printToken;
+				}
 				
-				// print token based on state
+				// print token formatted based on state
 				switch(state) {
 					case TEXT:
 						browser.print(printToken);
@@ -221,7 +237,7 @@ public class HTMLRender {
 						break;
 					case PRE:
 						browser.printPreformattedText(cur);
-						browser.println();
+						browser.printBreak();
 						break;
 				}
 				
@@ -230,7 +246,7 @@ public class HTMLRender {
 			}
 			
 			
-			// handle starting tags
+			/* Handle starting tags */
 			switch(cur.toLowerCase()) {
 				case "<br>":
 					// break line, reset lineChar
@@ -246,11 +262,9 @@ public class HTMLRender {
 					// limit maxChars
 					maxChars = 80;
 					lineChar = 0;
-					browser.println();
-					// print extra println if not a block tag
-					if (!isBlockTag(prev))
-						browser.println();
+					browser.printBreak();
 					break;
+				// set the state according to the tag
 				case "<b>":
 					state = TextState.BOLD;
 					break;
@@ -258,59 +272,48 @@ public class HTMLRender {
 					state = TextState.ITALIC;
 					break;
 				case "<q>":
-					browser.print("\"");
+					browser.print(" \"");
 					break;
 				case "<pre>":
 					state = TextState.PRE;
 					break;
 				case "<h1>":
+					// set the state
 					state = TextState.H1;
-					// different max chars for headers
+					// different max chars for different headers
 					maxChars = 40;
 					lineChar = 0;
-					browser.println();
-					if (!isBlockTag(prev))
-						browser.println();
+					browser.printBreak();
 					break;
 				case "<h2>":
 					state = TextState.H2;
-					maxChars = 40;
+					maxChars = 50;
 					lineChar = 0;
-					browser.println();
-					if (!isBlockTag(prev))
-						browser.println();
+					browser.printBreak();
 					break;
 				case "<h3>":
 					state = TextState.H3;
-					maxChars = 50;
+					maxChars = 60;
 					lineChar = 0;
-					browser.println();
-					if (!isBlockTag(prev))
-						browser.println();
+					browser.printBreak();
 					break;
 				case "<h4>":
 					state = TextState.H4;
-					maxChars = 60;
+					maxChars = 80;
 					lineChar = 0;
-					browser.println();
-					if (!isBlockTag(prev))
-						browser.println();
+					browser.printBreak();
 					break;
 				case "<h5>":
 					state = TextState.H5;
-					maxChars = 80;
+					maxChars = 100;
 					lineChar = 0;
-					browser.println();
-					if (!isBlockTag(prev))
-						browser.println();
+					browser.printBreak();
 					continue;
 				case "<h6>":
 					state = TextState.H6;
 					maxChars = 120;
 					lineChar = 0;
-					browser.println();
-					if (!isBlockTag(prev))
-						browser.println();
+					browser.printBreak();
 					break;
 			}
 		}
@@ -374,6 +377,23 @@ public class HTMLRender {
 		} else {
 			return false;
 		}
+	}
+	
+	
+	/**
+	 * Checks if a character is a punctuation in the list:
+	 * '.', ',', ';', ':', '(', ')', '?', '!', '=', '&', '~', '+', '-'
+	 * @param c		Character to check
+	 * @return		True if character is a punctuation
+	 */
+	private boolean isPunctuation(char c) {
+		char[] PUNCTUATION = new char[]{'.', ',', ';', ':', '(', ')', '?', '!',
+			'=', '&', '~', '+', '-'};
+		
+		for (int i = 0; i < PUNCTUATION.length; i++)
+			if (c == PUNCTUATION[i])
+				return true;
+		return false;
 	}
 	
 }
