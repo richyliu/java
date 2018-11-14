@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.util.ArrayList;
 
 /**
  *	HTMLRender
@@ -30,34 +29,22 @@ public class HTMLRender {
 	private String [] tokens;
 	private final int TOKENS_SIZE = 100000;	// size of array
 
-	// SimpleHtmlRenderer fields
+	// browser renderer
 	private SimpleHtmlRenderer render;
 	private HtmlPrinter browser;
+	// html utility to tokenize the input file
+	private HTMLUtilities util;
 	
 	// name of html file to render
 	private String fileName;
-	
-	private enum TextState {
-		TEXT,
-		BOLD,
-		ITALIC,
-		H1,
-		H2,
-		H3,
-		H4,
-		H5,
-		H6,
-		PRE,
-		NONE,
-	};
+	// types of text the current token could be
+	private enum TextState { TEXT, BOLD, ITALIC, H1, H2, H3, H4, H5, H6, PRE };
 	// type of text currently parsing
 	private TextState state;
 	
-	private HTMLUtilities util;
-	
 		
-	public HTMLRender(String fileName) {
-		this.fileName = fileName;
+	public HTMLRender(String inFileName) {
+		fileName = inFileName;
 		
 		// Initialize token array
 		tokens = new String[TOKENS_SIZE];
@@ -66,12 +53,18 @@ public class HTMLRender {
 		render = new SimpleHtmlRenderer();
 		browser = render.getHtmlPrinter();
 		
+		// initialize state
 		state = TextState.TEXT;
 		
+		// initialize html utilities
 		util = new HTMLUtilities();
 	}
 	
 	
+	/**
+	 * Main method, called by the JVM
+	 * @param args	Arguments to the program, should contain the file to render
+	 */
 	public static void main(String[] args) {
 		String fileName = "";
 		
@@ -87,6 +80,18 @@ public class HTMLRender {
 		
 		HTMLRender hf = new HTMLRender(fileName);
 		hf.run();
+	}
+	
+	
+	/**
+	 * Main runner method, called by the main method
+	 */
+	public void run() {
+		// read file
+		readFile();
+		
+		// draw the html file contents to the "browser"
+		render();
 	}
 	
 	
@@ -122,19 +127,11 @@ public class HTMLRender {
 	
 	
 	/**
-	 * Main runner method, called by the main method
-	 */
-	public void run() {
-		// read file
-		readFile();
-		
-		// draw the html file contents to the "browser"
-		render();
-	}
-	
-	
-	/**
-	 * Render the HTML file using the tokens array and the browser
+	 * Render the HTML file using the tokens array and the browser. This method
+	 * loops over the array of tokens, checking for starting and ending tags
+	 * and changing the formatting when appropriate. Tokens are printed each run
+	 * of the loop and newlines are printed when the current line exceeds the
+	 * maximum number of characters per line.
 	 */
 	public void render() {
 		// previous, current and next token
@@ -264,19 +261,21 @@ public class HTMLRender {
 					lineChar = 0;
 					browser.printBreak();
 					break;
-				// set the state according to the tag
+				// set the formatting state according to the tag
 				case "<b>":
 					state = TextState.BOLD;
 					break;
 				case "<i>":
 					state = TextState.ITALIC;
 					break;
+				// for quotes just print the quote
 				case "<q>":
 					browser.print(" \"");
 					break;
 				case "<pre>":
 					state = TextState.PRE;
 					break;
+				// same for all headings
 				case "<h1>":
 					// set the state
 					state = TextState.H1;
@@ -318,8 +317,8 @@ public class HTMLRender {
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Shrink array of Strings to smaller size
 	 * @param arr	String array to shrink
@@ -333,7 +332,8 @@ public class HTMLRender {
 		
 		return ret;
 	}
-	
+
+
 	/**
 	 * Check if a string is an HTML tag. A tag starts with "<" and ends with ">"
 	 * @param str	To check if it's an HTML tag
@@ -345,41 +345,8 @@ public class HTMLRender {
 			str.charAt(0) == '<' &&
 			str.charAt(str.length()-1) == '>';
 	}
-	
-	/**
-	 * Check if a tag is a block tag. Block tags begin and end with a newline.
-	 * @param str	To check if it's a block tag
-	 * @return		True if str is a block tag
-	 */
-	private boolean isBlockTag(String str) {
-		if (isTag(str)) {
-			// lowercase to avoid checking case
-			switch (str.toLowerCase()) {
-				// starting and ending tags
-				case "<p>":
-				case "<h1>":
-				case "<h2>":
-				case "<h3>":
-				case "<h4>":
-				case "<h5>":
-				case "<h6>":
-				case "</p>":
-				case "</h1>":
-				case "</h2>":
-				case "</h3>":
-				case "</h4>":
-				case "</h5>":
-				case "</h6>":
-					return true;
-				default:
-					return false;
-			}
-		} else {
-			return false;
-		}
-	}
-	
-	
+
+
 	/**
 	 * Checks if a character is a punctuation in the list:
 	 * '.', ',', ';', ':', '(', ')', '?', '!', '=', '&', '~', '+', '-'
