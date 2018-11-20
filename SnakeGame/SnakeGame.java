@@ -10,10 +10,12 @@ public class SnakeGame {
 	private SnakeBoard board;	// the game board
 	private Coordinate target;	// the target for the snake
 	private int score;			// the score of the game
+	
+	private final String FILE_NAME = "snakeGameSave.txt";
 
 	/*	Constructor	*/
 	public SnakeGame() {
-		board = new SnakeBoard(10, 15);
+		board = new SnakeBoard(20, 30);
 		snake = new Snake(3, 3);
 		target = new Coordinate(1, 7);
 	}
@@ -58,12 +60,20 @@ public class SnakeGame {
 	}
 	
 	public void run() {
-		while (true) {
-			oneMove();
+		boolean exit = false;
+		
+		printIntroduction();
+		
+		while (!exit) {
+			exit = oneMove();
 		}
+		
+		System.out.println("\nGame is over");
+		System.out.println("Score = " + score);
+		System.out.println("\nThanks for playing SnakeGame!!");
 	}
 	
-	public void oneMove() {
+	private boolean oneMove() {
 		char move = ' ';
 		String inStr = "";
 		// new head position
@@ -71,31 +81,55 @@ public class SnakeGame {
 		Coordinate currentHead = snake.get(0);
 		
 		board.printBoard(snake, target);
-		System.out.println("Score: " + score);
 		
 		while (move == ' ') {
-			inStr = Prompt.getString("make a move");
+			inStr = Prompt.getString("Score: " + score + " (w - North, s - South, d - East, a - West, h - Help)");
 			if (inStr.length() == 1) {
 				move = inStr.charAt(0);
-				if ("wasd".indexOf(move) < 0)
-					move = ' ';
+				
+				switch (move) {
+					case 'w':
+						moveCoord = addCoords(currentHead, -1, 0);
+						break;
+					case 'a':
+						moveCoord = addCoords(currentHead, 0, -1);
+						break;
+					case 's':
+						moveCoord = addCoords(currentHead, 1, 0);
+						break;
+					case 'd':
+						moveCoord = addCoords(currentHead, 0, 1);
+						break;
+					case 'h':
+						helpMenu();
+						return false;
+					case 'q':
+						return true;
+					case 'r':
+						loadFile();
+						return false;
+					default:
+						move = ' ';
+				}
 			}
 		}
 		
-		switch (move) {
-			case 'w':
-				moveCoord = addCoords(currentHead, -1, 0);
-				break;
-			case 'a':
-				moveCoord = addCoords(currentHead, 0, -1);
-				break;
-			case 's':
-				moveCoord = addCoords(currentHead, 1, 0);
-				break;
-			case 'd':
-				moveCoord = addCoords(currentHead, 0, 1);
-				break;
+		
+		
+		// check if move ran out of bounds
+		if (
+			moveCoord.getRow() < 0 || moveCoord.getRow() > board.getHeight() ||
+			moveCoord.getCol() < 0 || moveCoord.getCol() > board.getWidth()
+		) {
+			return true;
 		}
+		
+		// check if snake ran into itself
+		for (Coordinate snakePart : snake) {
+			if (snakePart.equals(moveCoord))
+				return true;
+		}
+				
 		
 		// check if head on target
 		if (moveCoord.equals(target)) {
@@ -111,6 +145,8 @@ public class SnakeGame {
 			}
 			snake.set(0, moveCoord);
 		}
+		
+		return false;
 	}
 	
 	
@@ -134,5 +170,47 @@ public class SnakeGame {
 	
 	private Coordinate addCoords(Coordinate one, int addRow, int addCol) {
 		return new Coordinate(one.getRow() + addRow, one.getCol() + addCol);
+	}
+	
+	
+	private void loadFile() {
+		java.util.Scanner in = FileUtils.openToRead(FILE_NAME);
+		String[] nextLineTokens = {""};
+		
+		nextLineTokens = in.nextLine().split(" ");
+		score = Integer.parseInt(nextLineTokens[1]);
+		
+		nextLineTokens = in.nextLine().split(" ");
+		target = new Coordinate(
+			Integer.parseInt(nextLineTokens[1]),
+			Integer.parseInt(nextLineTokens[2])
+		);
+		
+		nextLineTokens = in.nextLine().split(" ");
+		int snakeSize = Integer.parseInt(nextLineTokens[1]);
+		
+		Snake newSnake = new Snake();
+		for (int i = 0; i < newSnake.size(); i++) {
+			newSnake.remove(0);
+		}
+		
+		for (Coordinate sp : newSnake) {
+			System.out.println(sp);
+		}
+		
+		for (int i = 0; i < snakeSize; i++) {
+			nextLineTokens = in.nextLine().split(" ");
+			newSnake.add( new Coordinate(
+				Integer.parseInt(nextLineTokens[0]),
+				Integer.parseInt(nextLineTokens[1])
+			) );
+		}
+		
+		snake = newSnake;
+	}
+	
+	
+	private void saveFile() {
+		
 	}
 }
