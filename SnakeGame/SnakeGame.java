@@ -1,3 +1,6 @@
+import java.util.Scanner;
+import java.io.PrintWriter;
+
 /**
  *	Snake Game - <Description goes here>
  *	
@@ -18,6 +21,7 @@ public class SnakeGame {
 		board = new SnakeBoard(20, 30);
 		snake = new Snake(3, 3);
 		target = new Coordinate(1, 7);
+		replaceTarget();
 	}
 	
 	/*	Main method	*/
@@ -104,9 +108,12 @@ public class SnakeGame {
 						helpMenu();
 						return false;
 					case 'q':
-						return true;
+						return promptQuit();
 					case 'r':
 						loadFile();
+						return false;
+					case 'f':
+						saveFile();
 						return false;
 					default:
 						move = ' ';
@@ -174,7 +181,7 @@ public class SnakeGame {
 	
 	
 	private void loadFile() {
-		java.util.Scanner in = FileUtils.openToRead(FILE_NAME);
+		Scanner in = FileUtils.openToRead(FILE_NAME);
 		String[] nextLineTokens = {""};
 		
 		nextLineTokens = in.nextLine().split(" ");
@@ -190,13 +197,7 @@ public class SnakeGame {
 		int snakeSize = Integer.parseInt(nextLineTokens[1]);
 		
 		Snake newSnake = new Snake();
-		for (int i = 0; i < newSnake.size(); i++) {
-			newSnake.remove(0);
-		}
-		
-		for (Coordinate sp : newSnake) {
-			System.out.println(sp);
-		}
+		newSnake.clear();
 		
 		for (int i = 0; i < snakeSize; i++) {
 			nextLineTokens = in.nextLine().split(" ");
@@ -211,6 +212,38 @@ public class SnakeGame {
 	
 	
 	private void saveFile() {
+		boolean madeChoiceToSave = false;
 		
+		while(!madeChoiceToSave) {
+			String input = Prompt.getString("\nSave game? (y or n)");
+			
+			if (input.equals("y"))
+				madeChoiceToSave = true;
+			else if (input.equals("n"))
+				return;
+		}
+		
+		PrintWriter out = FileUtils.openToWrite(FILE_NAME);
+		out.println("Score " + score);
+		out.println("Target " + target.getRow() + " " + target.getCol());
+		out.println("Snake " + snake.size());
+		for (Coordinate snakePart : snake)
+			out.println(snakePart.getRow() + " " + snakePart.getCol());
+		out.close();
+	}
+	
+	private boolean promptQuit() {
+		String input = "";
+		
+		while(true) {
+			input = Prompt.getString("\nDo you really want to quit? (y or n)");
+			
+			if (input.equals("y")) {
+				return true;
+			}
+			if (input.equals("n")) {
+				return false;
+			}
+		}
 	}
 }
