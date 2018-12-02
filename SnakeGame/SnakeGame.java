@@ -219,43 +219,33 @@ public class SnakeGame {
 	private void loadFile() {
 		// use fileutils to open file
 		Scanner in = FileUtils.openToRead(FILE_NAME);
-		// tokens of the next line, init to empty string
-		String[] nextLineTokens = {""};
 		
-		// get the scores line split by space
-		nextLineTokens = in.nextLine().split(" ");
+		// ignore 1st token
+		in.next();
 		// score is the integer of the 2nd token on that line
-		score = Integer.parseInt(nextLineTokens[1]);
+		score = in.nextInt();
 		
-		// get the target line split by space
-		nextLineTokens = in.nextLine().split(" ");
+		// ignore 1st token
+		in.next();
 		// row and col of target is the 2nd and 3rd token
-		target = new Coordinate(
-			Integer.parseInt(nextLineTokens[1]) - 1,
-			Integer.parseInt(nextLineTokens[2]) - 1
-		);
+		// subtract 1 since coords start from 1
+		target = new Coordinate(in.nextInt() - 1, in.nextInt() - 1);
 		
-		// get the snake size in the next line
-		nextLineTokens = in.nextLine().split(" ");
-		// snaek size is the 2nd token
-		int snakeSize = Integer.parseInt(nextLineTokens[1]);
+		// ignore 1st token
+		in.next();
+		// snake size is the 2nd token
+		int snakeSize = in.nextInt();
 		
-		// create a new empty snake
-		Snake newSnake = new Snake();
-		newSnake.clear();
+		// create a new snake
+		snake = new Snake();
+		// reset snake to empty it
+		snake.clear();
 		
-		// add to new snake based on size
+		// add to snake body parts to snake
 		for (int i = 0; i < snakeSize; i++) {
-			// read the next line, with the row and col of snake body position
-			nextLineTokens = in.nextLine().split(" ");
-			newSnake.add( new Coordinate(
-				Integer.parseInt(nextLineTokens[0]) - 1,
-				Integer.parseInt(nextLineTokens[1]) - 1
-			) );
+			// subtract 1 since coords start from 1
+			snake.add(new Coordinate(in.nextInt() - 1, in.nextInt() - 1));
 		}
-		
-		// set snake to the new snake
-		snake = newSnake;
 	}
 	
 	
