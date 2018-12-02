@@ -68,47 +68,59 @@ public class SortMethods {
 	 *	@param arr		array of Integer objects to sort
 	 */
 	public void mergeSort(Integer [] arr) {
-		int[] a = new int[arr.length];
-		for (int i = 0; i < arr.length; i++) {
-			a[i] = arr[i];
-		}
-		
-		ms(a, 0, arr.length - 1);
+		Integer[] sorted = ms(arr, 0, arr.length - 1);
+		// copy to arr
+		for (int i = 0; i < arr.length; i++)
+			arr[i] = sorted[i];
 	}
 	
-	private int[] ms(int[] arr, int start, int end) {
+	/**
+	 * Merge sort recursive part
+	 * @param arr	Array of Integer objects to sort
+	 * @param start	Where to start sorting (inclusive)
+	 * @param end	Where to end sorting (inclusive)
+	 * @return		Sorted Integer[] array
+	 */
+	private Integer[] ms(Integer[] arr, int start, int end) {
+		// if 1 number, that is by definition sorted
 		if (start == end) {
-			return new int[]{ arr[start] };
+			return new Integer[]{ arr[start] };
 		}
 		
+		// where to split to sort
 		int split = (end - start) / 2;
-		int[] a = ms(arr, start, start + split);
-		int[] b = ms(arr, start + split+1, end);
-		for (int x = 0; x < a.length; x++)
-			System.out.print(a[x] + ", ");
-		System.out.println();
+		// split into 2 parts and sort
+		Integer[] a = ms(arr, start, start + split);
+		Integer[] b = ms(arr, start + split + 1, end);
 		
-		int ap = 0;
-		int bp = 0;
-		
-		int[] sorted = new int[end - start + 1];
+		Integer[] sorted = new Integer[a.length + b.length];
+		// index of a and b array
+		int ai = 0;
+		int bi = 0;
+		// index of sorted array
 		int i = 0;
 		
-		while(ap < a.length && bp < b.length) {
-			if (a[ap] < b[bp]) {
-				sorted[i] = a[ap];
-				i++;
-				ap++;
+		// merge the a and b parts together
+		while(ai < a.length && bi < b.length) {
+			if (b[bi].compareTo(a[ai]) > 0) {
+				sorted[i] = a[ai];
+				ai++;
 			} else {
-				sorted[i] = b[bp];
-				i++;
-				ap++;
+				sorted[i] = b[bi];
+				bi++;
 			}
-		}
-		while(bp < b.length) {
-			sorted[i] = b[bp];
 			i++;
-			bp++;
+		}
+		// add remaining from a and b to sorted array
+		while(bi < b.length) {
+			sorted[i] = b[bi];
+			i++;
+			bi++;
+		}
+		while(ai < a.length) {
+			sorted[i] = a[ai];
+			i++;
+			ai++;
 		}
 		
 		return sorted;
