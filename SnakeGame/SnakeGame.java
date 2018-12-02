@@ -2,7 +2,9 @@ import java.util.Scanner;
 import java.io.PrintWriter;
 
 /**
- *	Snake Game - <Description goes here>
+ *	Snake Game - A game where the user moves a snake using the WASD keys, trying
+ * 	to eat targets and growing in size. The game ends if the snake hits a wall
+ * 	or itself
  *	
  *	@author	Richard Liu
  *	@since	November 15, 2018
@@ -13,15 +15,13 @@ public class SnakeGame {
 	private SnakeBoard board;	// the game board
 	private Coordinate target;	// the target for the snake
 	private int score;			// the score of the game
-	
+	// name of the game save file
 	private final String FILE_NAME = "snakeGameSave.txt";
 
 	/*	Constructor	*/
 	public SnakeGame() {
-		//board = new SnakeBoard(20, 30);
-		//snake = new Snake(3, 3);
-		board = new SnakeBoard(8, 2);
-		snake = new Snake(0, 0);
+		board = new SnakeBoard(20, 25);
+		snake = new Snake(2, 2);
 		target = new Coordinate(1, 1);
 		// move target to a random location
 		replaceTarget();
@@ -63,6 +63,7 @@ public class SnakeGame {
 							"  f - save game to file\n" +
 							"  r - restore game from file\n" +
 							"  q - quit");
+		// wait for user to press enter
 		Prompt.getString("Press enter to continue");
 	}
 	
@@ -103,14 +104,24 @@ public class SnakeGame {
 		// print the board with the current snake and target
 		board.printBoard(snake, target);
 		
+		// check if no where else for the snake to move
+		if (board.surrounded(snake.get(0), snake))
+			return true;
+		
+		// or if only 5 squares left
+		if (board.getWidth() * board.getHeight() - snake.size() <= 5)
+			return true;
+		
 		// while user had not made a valid action
 		while (move == ' ') {
 			// prompt the user for action
-			inStr = Prompt.getString("Score: " + score + " (w - North, s - South, d - East, a - West, h - Help)");
+			inStr = Prompt.getString("Score: " + score +
+					" (w - North, s - South, d - East, a - West, h - Help)");
 			// only valid action if inStr is 1 long
 			if (inStr.length() == 1) {
 				move = inStr.charAt(0);
 				
+				// do an action corresponding do a key
 				switch (move) {
 					// move head if direction key
 					case 'w':
@@ -138,9 +149,9 @@ public class SnakeGame {
 						loadFile();
 						return false;
 					case 'f':
-						// load file and don't do the rest of the method
+						// save file and quit the game
 						saveFile();
-						return false;
+						return true;
 					default:
 						// invalid move, set back to space
 						move = ' ';
@@ -178,14 +189,6 @@ public class SnakeGame {
 			}
 			snake.set(0, moveCoord);
 		}
-		
-		// check if no where else for the snake to move
-		if (board.surrounded(snake.get(0), snake))
-			return true;
-		
-		// or if only 5 squares left
-		if (board.getWidth() * board.getHeight() - snake.size() <= 5)
-			return true;
 		
 		return false;
 	}
@@ -288,6 +291,9 @@ public class SnakeGame {
 		
 		// close file to save it
 		out.close();
+		
+		// tell the user
+		System.out.println("\nSaving game to file " + FILE_NAME);
 	}
 	
 	/**
@@ -311,6 +317,8 @@ public class SnakeGame {
 			if (input.equals("n")) {
 				return false;
 			}
+			
+			// user didn't press "y" or "n", keep asking
 		}
 	}
 }

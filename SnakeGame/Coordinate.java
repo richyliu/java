@@ -1,5 +1,5 @@
 /**
- * Coordinate of the snake
+ * Coordinate object, storing the row and columns value for any given point.
  * 
  * @author Richard Liu
  * @since  November 15, 2018
@@ -14,10 +14,18 @@ public class Coordinate {
 		col = inCol;
 	}
 	
+	/**
+	 * Get the row of the coordinate
+	 * @return Row
+	 */
 	public int getRow() {
 		return row;
 	}
 	
+	/**
+	 * Get the column of the coordinate
+	 * @return Column
+	 */
 	public int getCol() {
 		return col;
 	}

@@ -1,5 +1,5 @@
 /**
- *	<Describe the SnakeBoard here>
+ *	Holds the game board for snake game, contains methods for drawing the board.
  *
  *	@author	Richard Liu
  *	@since	November 15, 2018
@@ -8,8 +8,8 @@ public class SnakeBoard {
 	
 	/*	fields	*/
 	private char[][] board;			// The 2D array to hold the board
-	private int width;
-	private int height;
+	private int width;				// width of the board
+	private int height;				// height of the board
 	
 	/*	Constructor	*/
 	public SnakeBoard(int height, int width) {
@@ -134,7 +134,16 @@ public class SnakeBoard {
 	}
 	
 	/*	Accessor methods	*/
+	
+	/**
+	 * Get the width of the board
+	 * @return Number of columns
+	 */
 	public int getWidth() { return width; }
+	/**
+	 * Get the height of the board
+	 * @return Number of rows
+	 */
 	public int getHeight() { return height; }
 
 	
