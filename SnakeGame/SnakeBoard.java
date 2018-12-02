@@ -54,12 +54,15 @@ public class SnakeBoard {
 		
 		// print main grid
 		for (int r = 0; r < board.length; r++) {
+			// print left side bar
 			System.out.print("| ");
 			
+			// print the row of the board
 			for (int c = 0; c < board[r].length; c++) {
 				System.out.print(board[r][c] + " ");
 			}
 			
+			// print right side bar
 			System.out.println("|");
 		}
 		
@@ -71,6 +74,64 @@ public class SnakeBoard {
 	}
 	
 	/* Helper methods go here	*/
+	
+	/**
+	 * Checks if a certain location is surrounded on all sides by a snake body
+	 * @param head	Location of the snake head
+	 * @param snake	Snake body
+	 * @return True if the head is surrounded by the snake body or side of board
+	 */
+	public boolean surrounded(Coordinate head, Snake snake) {
+		// all 4 sides
+		int[][] sides = {
+			{0, -1},
+			{1, 0},
+			{0, 1},
+			{-1, 0}
+		};
+		// num sides surrounded
+		int numSurrounded = 0;
+		
+		// loop through 4 sides
+		for (int i = 0; i < sides.length; i++) {
+			Coordinate loc = addCoords(head, sides[i][0], sides[i][1]);
+			
+			if (
+				loc.getRow() < 0 || loc.getRow() >= getHeight() ||
+				loc.getCol() < 0 || loc.getCol() >= getWidth() ||
+				snake.contains(loc)
+			)
+				numSurrounded++;
+		}
+		
+		return numSurrounded >= 4;
+	}
+	
+	
+	/**
+	 * Add row and column to a coordinate.
+	 * @param coord		Coordinate to add
+	 * @param addRow	Row to be added to coord
+	 * @param addCol	Column to be added to coord
+	 * @return 			New added coord
+	 */
+	public Coordinate addCoords(Coordinate coord, int addRow, int addCol) {
+		return new Coordinate(coord.getRow() + addRow, coord.getCol() + addCol);
+	}
+	
+	
+	/**
+	 * Add two coordinates together
+	 * @param coord		First coordinate to add
+	 * @param coord2	Second coordinate to add
+	 * @return 			New added coord
+	 */
+	public Coordinate addCoords(Coordinate coord, Coordinate coord2) {
+		return new Coordinate(
+			coord.getRow() + coord2.getRow(),
+			coord.getCol() + coord2.getCol()
+		);
+	}
 	
 	/*	Accessor methods	*/
 	public int getWidth() { return width; }
