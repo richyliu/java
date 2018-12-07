@@ -14,7 +14,7 @@ public class City implements Comparable<City> {
 	private int population;			// population of city
 	
 	// constructor
-	public City(String name, String state, String designation, int population) {
+	public City(String state, String name, String designation, int population) {
 		this.name = name;
 		this.state = state;
 		this.designation = designation;
@@ -59,6 +59,14 @@ public class City implements Comparable<City> {
 	/**	Accessor methods */
 	public int getPop() {
 		return this.population;
+	}
+	
+	public String getName() {
+		return this.name;
+	}
+	
+	public String getState() {
+		return this.state;
 	}
 	
 	/**	toString */

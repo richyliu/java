@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- *	SortMethods - Sorts an array of Citys in ascending order.
+ *	SortMethods - Sorts a list of Citys by name or population
  *
  *	@author Richard Liu
  *	@since	November 29, 2018
@@ -34,10 +34,10 @@ public class SortMethods {
 	}
 	
 	/**
-	 *	Selection Sort algorithm - in ascending order (you implement)
+	 *	Selection Sort algorithm - population in ascending order
 	 *	@param arr		array of City objects to sort
 	 */
-	public void selectionSort(List<City> arr) {
+	public void selectionSortPop(List<City> arr) {
 		for (int i = arr.size(); i > 1; i--) {
 			// index of max element
 			int max = 0;
@@ -50,15 +50,15 @@ public class SortMethods {
 	}
 	
 	/**
-	 *	Insertion Sort algorithm - in ascending order (you implement)
+	 *	Insertion Sort algorithm - in ascending order
 	 *	@param arr		array of City objects to sort
 	 */
-	public void insertionSort(List<City> arr) {
+	public void insertionSortName(List<City> arr) {
 		for (int i = 1; i < arr.size(); i++) {
 			City next = arr.get(i);
 			
 			int j = i;
-			while(j > 0 && next.compareTo(arr.get(j-1)) < 0) {
+			while(j > 0 && next.compareToName(arr.get(j-1)) < 0) {
 				arr.set(j, arr.get(j-1));
 				j--;
 			}
@@ -68,24 +68,24 @@ public class SortMethods {
 	}
 	
 	/**
-	 *	Merge Sort algorithm - in ascending order (you implement)
+	 *	Merge Sort algorithm - population in descending order
 	 *	@param arr		array of City objects to sort
 	 */
-	public void mergeSort(List<City> arr) {
-		List<City> sorted = ms(arr, 0, arr.size() - 1);
+	public void mergeSortPop(List<City> arr) {
+		List<City> sorted = msPop(arr, 0, arr.size() - 1);
 		// copy to arr
 		for (int i = 0; i < arr.size(); i++)
 			arr.set(i, sorted.get(i));
 	}
 	
 	/**
-	 * Merge sort recursive part
+	 * Merge sort recursive part - population in descending order
 	 * @param arr	Array of City objects to sort
 	 * @param start	Where to start sorting (inclusive)
 	 * @param end	Where to end sorting (inclusive)
 	 * @return		Sorted List<City> array
 	 */
-	private List<City> ms(List<City> arr, int start, int end) {
+	private List<City> msPop(List<City> arr, int start, int end) {
 		// if 1 number, that is by definition sorted
 		if (start == end) {
 			return new ArrayList<City>(Arrays.asList(arr.get(start)));
@@ -94,8 +94,8 @@ public class SortMethods {
 		// where to split to sort
 		int split = (end - start) / 2;
 		// split into 2 parts and sort
-		List<City> a = ms(arr, start, start + split);
-		List<City> b = ms(arr, start + split + 1, end);
+		List<City> a = msPop(arr, start, start + split);
+		List<City> b = msPop(arr, start + split + 1, end);
 		
 		List<City> sorted = new ArrayList<City>();
 		// index of a and b array
@@ -104,7 +104,65 @@ public class SortMethods {
 		
 		// merge the a and b parts together
 		while(ai < a.size() && bi < b.size()) {
-			if (b.get(bi).compareTo(a.get(ai)) > 0) {
+			if (b.get(bi).compareTo(a.get(ai)) < 0) {
+				sorted.add(a.get(ai));
+				ai++;
+			} else {
+				sorted.add(b.get(bi));
+				bi++;
+			}
+		}
+		// add remaining from a and b to sorted array
+		while(bi < b.size()) {
+			sorted.add(b.get(bi));
+			bi++;
+		}
+		while(ai < a.size()) {
+			sorted.add(a.get(ai));
+			ai++;
+		}
+		
+		return sorted;
+	}
+	
+	/**
+	 *	Merge Sort algorithm - name in descending order
+	 *	@param arr		array of City objects to sort
+	 */
+	public void mergeSortName(List<City> arr) {
+		List<City> sorted = msName(arr, 0, arr.size() - 1);
+		// copy to arr
+		for (int i = 0; i < arr.size(); i++)
+			arr.set(i, sorted.get(i));
+	}
+	
+	/**
+	 * Merge sort recursive part - name in descending order
+	 * @param arr	Array of City objects to sort
+	 * @param start	Where to start sorting (inclusive)
+	 * @param end	Where to end sorting (inclusive)
+	 * @return		Sorted List<City> array
+	 */
+	private List<City> msName(List<City> arr, int start, int end) {
+		// if 1 number, that is by definition sorted
+		if (start == end) {
+			return new ArrayList<City>(Arrays.asList(arr.get(start)));
+		}
+		
+		// where to split to sort
+		int split = (end - start) / 2;
+		// split into 2 parts and sort
+		List<City> a = msName(arr, start, start + split);
+		List<City> b = msName(arr, start + split + 1, end);
+		
+		List<City> sorted = new ArrayList<City>();
+		// index of a and b array
+		int ai = 0;
+		int bi = 0;
+		
+		// merge the a and b parts together
+		while(ai < a.size() && bi < b.size()) {
+			if (b.get(bi).compareToName(a.get(ai)) < 0) {
 				sorted.add(a.get(ai));
 				ai++;
 			} else {
@@ -149,7 +207,7 @@ public class SortMethods {
 	}
 	
 	public void run() {
-		List<City> arr = new ArrayList<City>();
+		/*List<City> arr = new ArrayList<City>();
 		// Fill arr with random numbers
 		for (int a = 0; a < 10; a++)
 			arr.add(new City("foo", "bar", "baz", (int)(Math.random() * 100) + 1));
@@ -197,6 +255,6 @@ public class SortMethods {
 		System.out.println("Array after sort:");
 		printArray(arr);
 		System.out.println();
-
+*/
 	}
 }
