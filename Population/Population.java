@@ -78,9 +78,18 @@ public class Population {
 			
 			cities.add(new City(name, state, designation, population));
 		}
-		
-		for (int i = 0; i < 10; i++)
-			System.out.println(cities.get(i));
+	}
+	
+	/**
+	 *	Swaps two Integer objects in array arr
+	 *	@param arr		array of Integer objects
+	 *	@param x		index of first object to swap
+	 *	@param y		index of second object to swap
+	 */
+	private void swap(List<City> arr, int x, int y) {
+		City temp = arr.get(x);
+		arr.set(x, arr.get(y));
+		arr.set(y, temp);
 	}
 	
 }

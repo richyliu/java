@@ -39,6 +39,15 @@ public class City implements Comparable<City> {
 		return this.name.compareTo(other.name);
 	}
 	
+	/**
+	 * Compare two cities names
+	 * @param other		The other city to compare
+	 * @return			this.name - other.name
+	 */
+	public int compareToName(City other) {
+		return this.name.compareTo(other.name);
+	}
+	
 	/**	Equal city name and state name
 	 *	@param other		the other City to compare
 	 *	@return				true if city name and state name equal; false otherwise
@@ -48,6 +57,9 @@ public class City implements Comparable<City> {
 	}
 	
 	/**	Accessor methods */
+	public int getPop() {
+		return this.population;
+	}
 	
 	/**	toString */
 	@Override
