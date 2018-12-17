@@ -6,18 +6,56 @@ public class ProTester {
 	
 	private int numTotal;
 	private int numCorrect;
+	private String print;
+	
+	public static final String COLOR_RESET = "\u001B[0m";
+	
+	public static final int FG_BLACK = 30;
+	public static final int FG_RED = 31;
+	public static final int FG_GREEN = 32;
+	public static final int FG_YELLOW = 33;
+	public static final int FG_BLUE = 34;
+	public static final int FG_PINK = 35;
+	public static final int FG_CYAN = 36;
+	public static final int FG_WHITE = 37;
+	public static final int BG_BLACK = 40;
+	public static final int BG_RED = 41;
+	public static final int BG_GREEN = 42;
+	public static final int BG_YELLOW = 43;
+	public static final int BG_BLUE = 44;
+	public static final int BG_PINK = 45;
+	public static final int BG_CYAN = 46;
+	public static final int BG_WHITE = 47;
+	
+	public static String genColorCode(int fg) {
+		return "\u001B[" + fg + "m";
+	}
+	
+	public static String genColorCode(int fg, int bg) {
+		return "\u001B[" + bg + ";" + fg + "m";
+	}
+	
+	public static void printColor(int fg, String str) {
+		System.out.print(genColorCode(fg) + str + COLOR_RESET);
+	}
+	
+	public static void printColor(int fg, int bg, String str) {
+		System.out.print(genColorCode(fg, bg) + str + COLOR_RESET);
+	}
+	
 	
 	public ProTester() {
 		numTotal = 0;
 		numCorrect = 0;
+		
+		System.out.println();
 		printLongBreak();
-        
-		run();
+        run();
 		printResults();
 	}
 	
 	public void run() {
-		ptl("Superclass");
+		System.out.println("Superclass");
 	}
 	
 	/**
@@ -25,40 +63,49 @@ public class ProTester {
 	 * @param str	Name of the test block
 	 */
 	public void next(String str) {
-		ptl();
-		ptl();
+		System.out.println();
 		printShortBreak();
-		ptl("TEST BLOCK:    " + str);
+		System.out.println("TEST BLOCK:    " + str);
+		ptClear();
 	}
 	
 	/**
 	 * Print the number of correct and incorrect test cases
 	 */
 	public void printResults() {
-		ptl();
-		ptl();
+		System.out.println();
 		printLongBreak();
-		System.out.printf("Correct : %d\nTotal: %d\nCorrect%%: %.2f%%\n\n",
+		
+		System.out.printf("%-12s %d / %d\n%-12s %.2f%%\n\n\n",
+			"Correct:",
 			numCorrect,
 			numTotal,
-			(double)numCorrect/numTotal * 100);
+			"Percentage:",
+			(double)numCorrect/numTotal * 100
+		);
 	}
 	
 	/**
-     * Prints to system output without newline
+     * Prints to print buffer without newline
      * @param str Item to print (can be any type)
      */
-    public <T> void pt(T str) { System.out.print(str); }
+    public <T> void pt(T str) {
+		print += str;
+	}
     /**
-     * Prints to system output with newline
+     * Prints to print buffer with newline
      * @param str Item to print (can be any type)
      */
-    public <T> void ptl(T str) { System.out.println(str); }
+    public <T> void ptl(T str) {
+		print += str + "\n";
+	}
     /**
-     * Prints newline to system output
+     * Prints newline to print buffer
      * @param str Item to print (can be any type)
      */
-    public void ptl() { System.out.println(); }
+    public void ptl() {
+		print += "\n";
+	}
 
     /**
      * Checks if 2 values are equal using equal method or reference comparison
@@ -67,15 +114,34 @@ public class ProTester {
      */
     public <T> void be(T a, T b) {
         if (a == b || a.equals(b)) {
-            ptl("PASS: " + a);
+			printColor(FG_GREEN, "PASS");
+            System.out.println(": \"" + a + "\"");
             numCorrect++;
             numTotal++;
         } else {
-            pt("!!FAIL: ");
-			ptl(a + " should be " + b);
+            printColor(FG_RED, "FAIL");
+            System.out.print(": Expected: \"" + b + "\", received \"");
+            printColor(FG_WHITE, BG_RED, (String)a);
+            System.out.println("\"");
+			
             numTotal++;
 		}
     }
+    
+    /**
+     * Check if the current print buffer is equal to string
+     * @param a	To check if print buffer is equal to
+     */
+    public void ptBe(String a) {
+		be(a, print);
+	}
+	
+	/**
+	 * Clear print buffer
+	 */
+	public void ptClear() {
+		print = "";
+	}
     
     /**
      * Prints an array with newlines separating the items
@@ -83,20 +149,24 @@ public class ProTester {
      */
     public void pta(double[] a) {
         for (int i = 0; i < a.length; i++)
-            ptl(a[i]);
+            System.out.println(a[i]);
     }
     
     /**
      * Prints a long line in the terminal using "="
      */
     public void printLongBreak() {
-        ptl("=================================================");
+        System.out.println(
+			"=================================================================="
+		);
 	}
     
     /**
-     * Prints a short line in the terminal using "="
+     * Prints a short line in the terminal using "-"
      */
     public void printShortBreak() {
-		ptl("----------------------------------------");
+		System.out.println(
+			"------------------------------------------------------------------"
+		);
 	}
 }
