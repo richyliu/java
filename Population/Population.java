@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Arrays;	
 
 /**
  *	Population - Sorts and prints the cities of USA according to population or
@@ -18,8 +19,6 @@ public class Population {
 	private List<City> cities;
 	// US data file
 	private final String DATA_FILE = "usPopData2017.txt";
-	// sort methods instance
-	private SortMethods sort;
 	private boolean exit;
 	
 	
@@ -29,7 +28,6 @@ public class Population {
 	 */
 	public Population() {
 		cities = new ArrayList<City>();
-		sort = new SortMethods();
 		exit = false;
 	}
 	
@@ -70,16 +68,16 @@ public class Population {
 		switch (selection) {
 			// sort cities using sort method for 1-4
 			case 1:
-				sort.selectionSortPop(cities);
+				selectionSortPop(cities);
 				break;
 			case 2:
-				sort.mergeSortPop(cities);
+				mergeSortPop(cities);
 				break;
 			case 3:
-				sort.insertionSortName(cities);
+				insertionSortName(cities);
 				break;
 			case 4:
-				sort.mergeSortName(cities);
+				mergeSortName(cities);
 				break;
 			// 5-6 require additional prompting
 			case 5:
@@ -101,7 +99,7 @@ public class Population {
 				System.out.println("\nFifty most populous cities in " + state);
 				
 				// sort and print
-				sort.mergeSortPop(inState);
+				mergeSortPop(inState);
 				printCities(inState);
 				// don't do the stuff after the break
 				return;
@@ -123,7 +121,7 @@ public class Population {
 				System.out.printf("\nCity %s by population\n", cityName);
 				
 				// sort and print
-				sort.mergeSortPop(otherCities);
+				mergeSortPop(otherCities);
 				printCities(otherCities);
 				// don't do the stuff after the break
 				return;				
@@ -139,37 +137,29 @@ public class Population {
 		
 		// print cites for selections 1-4
 		if (selection >= 1 && selection <= 4)
-			printCities();
+			printCities(cities);
 		
 		// tell user the elapsed time
 		System.out.printf("\nElapsed time %d milliseconds\n", end - start);
 	}
 	
-	
-	/**
-	 * Print the field cities array list
-	 */
-	public void printCities() {
-		printCities(cities);
-	}
-	
-	
+
 	/**
 	 * Print a list of cities formatted correctly
 	 * @param ct	Cites list to print
 	 */
-	public void printCities(List<City> ct) {
+	public void printCities(List<City> cityList) {
 		// number of cities to print
-		// if ct list size is less than this number then size will be used
+		// if cityList size is less than this number then size will be used
 		int PRINT_NUM = 50;
 		
 		// print header
 		System.out.printf("\n     %-22s %-22s %-12s %12s\n", "State", "City",
 				"Type", "Population");
 		// print each line with a number
-		for (int i = 0; i < Math.min(PRINT_NUM, ct.size()); i++) {
+		for (int i = 0; i < Math.min(PRINT_NUM, cityList.size()); i++) {
 			System.out.printf("%3d: ", i+1);
-			System.out.println(ct.get(i));
+			System.out.println(cityList.get(i));
 		}
 	}
 	
@@ -208,5 +198,180 @@ public class Population {
 		// add from file to cities list
 		while(in.hasNext())
 			cities.add(new City(in.next(), in.next(), in.next(), in.nextInt()));
-	}	
+	}
+	
+	
+	
+	/**
+	 *	Bubble Sort algorithm - in ascending order
+	 *	@param arr		array of City objects to sort
+	 */
+	public void bubbleSort(List<City> arr) {
+		for (int a = arr.size() - 1; a > 0; a--)
+			for (int b = 0; b < a; b++)
+				if (arr.get(b).compareTo(arr.get(b+1)) > 0)
+					swap(arr, b, b+1);
+	}
+	
+	/**
+	 *	Swaps two City objects in array arr
+	 *	@param arr		array of City objects
+	 *	@param x		index of first object to swap
+	 *	@param y		index of second object to swap
+	 */
+	private void swap(List<City> arr, int x, int y) {
+		City temp = arr.get(x);
+		arr.set(x, arr.get(y));
+		arr.set(y, temp);
+	}
+	
+	/**
+	 *	Selection Sort algorithm - population in ascending order
+	 *	@param arr		array of City objects to sort
+	 */
+	public void selectionSortPop(List<City> arr) {
+		for (int i = arr.size(); i > 1; i--) {
+			// index of max element
+			int max = 0;
+			
+			for (int j = 0; j < i; j++)
+				if (arr.get(j).compareTo(arr.get(max)) > 0)
+					max = j;
+			swap(arr, max, i-1);
+		}
+	}
+	
+	/**
+	 *	Insertion Sort algorithm - in ascending order
+	 *	@param arr		array of City objects to sort
+	 */
+	public void insertionSortName(List<City> arr) {
+		for (int i = 1; i < arr.size(); i++) {
+			City next = arr.get(i);
+			
+			int j = i;
+			while(j > 0 && next.compareToName(arr.get(j-1)) < 0) {
+				arr.set(j, arr.get(j-1));
+				j--;
+			}
+			
+			arr.set(j, next);
+		}
+	}
+	
+	/**
+	 *	Merge Sort algorithm - population in descending order
+	 *	@param arr		array of City objects to sort
+	 */
+	public void mergeSortPop(List<City> arr) {
+		List<City> sorted = msPop(arr, 0, arr.size() - 1);
+		// copy to arr
+		for (int i = 0; i < arr.size(); i++)
+			arr.set(i, sorted.get(i));
+	}
+	
+	/**
+	 * Merge sort recursive part - population in descending order
+	 * @param arr	Array of City objects to sort
+	 * @param start	Where to start sorting (inclusive)
+	 * @param end	Where to end sorting (inclusive)
+	 * @return		Sorted List<City> array
+	 */
+	private List<City> msPop(List<City> arr, int start, int end) {
+		// if 1 number, that is by definition sorted
+		if (start == end) {
+			return new ArrayList<City>(Arrays.asList(arr.get(start)));
+		}
+		
+		// where to split to sort
+		int split = (end - start) / 2;
+		// split into 2 parts and sort
+		List<City> a = msPop(arr, start, start + split);
+		List<City> b = msPop(arr, start + split + 1, end);
+		
+		List<City> sorted = new ArrayList<City>();
+		// index of a and b array
+		int ai = 0;
+		int bi = 0;
+		
+		// merge the a and b parts together
+		while(ai < a.size() && bi < b.size()) {
+			if (b.get(bi).compareTo(a.get(ai)) < 0) {
+				sorted.add(a.get(ai));
+				ai++;
+			} else {
+				sorted.add(b.get(bi));
+				bi++;
+			}
+		}
+		// add remaining from a and b to sorted array
+		while(bi < b.size()) {
+			sorted.add(b.get(bi));
+			bi++;
+		}
+		while(ai < a.size()) {
+			sorted.add(a.get(ai));
+			ai++;
+		}
+		
+		return sorted;
+	}
+	
+	/**
+	 *	Merge Sort algorithm - name in descending order
+	 *	@param arr		array of City objects to sort
+	 */
+	public void mergeSortName(List<City> arr) {
+		List<City> sorted = msName(arr, 0, arr.size() - 1);
+		// copy to arr
+		for (int i = 0; i < arr.size(); i++)
+			arr.set(i, sorted.get(i));
+	}
+	
+	/**
+	 * Merge sort recursive part - name in descending order
+	 * @param arr	Array of City objects to sort
+	 * @param start	Where to start sorting (inclusive)
+	 * @param end	Where to end sorting (inclusive)
+	 * @return		Sorted List<City> array
+	 */
+	private List<City> msName(List<City> arr, int start, int end) {
+		// if 1 number, that is by definition sorted
+		if (start == end) {
+			return new ArrayList<City>(Arrays.asList(arr.get(start)));
+		}
+		
+		// where to split to sort
+		int split = (end - start) / 2;
+		// split into 2 parts and sort
+		List<City> a = msName(arr, start, start + split);
+		List<City> b = msName(arr, start + split + 1, end);
+		
+		List<City> sorted = new ArrayList<City>();
+		// index of a and b array
+		int ai = 0;
+		int bi = 0;
+		
+		// merge the a and b parts together
+		while(ai < a.size() && bi < b.size()) {
+			if (b.get(bi).compareToName(a.get(ai)) < 0) {
+				sorted.add(a.get(ai));
+				ai++;
+			} else {
+				sorted.add(b.get(bi));
+				bi++;
+			}
+		}
+		// add remaining from a and b to sorted array
+		while(bi < b.size()) {
+			sorted.add(b.get(bi));
+			bi++;
+		}
+		while(ai < a.size()) {
+			sorted.add(a.get(ai));
+			ai++;
+		}
+		
+		return sorted;
+	}
 }
