@@ -1,23 +1,59 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 /**
- *	SudokuMaker - Creates a Sudoku puzzle using recursion and backtracking
+ *	SudokuSolver - Solves an incomplete Sudoku puzzle using recursion and backtracking
  *
  *	@author	Richard Liu
- *	@since  Jan. 22, 2019
+ *	@since	Jan. 25, 2019
  *
  */
-public class SudokuMaker {
+public class SudokuSolver {
 
-	private int[][] puzzle;
+	private int[][] puzzle;		// the Sudoku puzzle
 	private final int PUZZLE_SIZE = 9;
 	
-	public SudokuMaker() {
-		// create blank puzzle
-		puzzle = new int[PUZZLE_SIZE][PUZZLE_SIZE];
+	private String PUZZLE_FILE = "puzzle1.txt";	// default puzzle file
+	
+	/* Constructor */
+	public SudokuSolver() {
+		puzzle = new int[9][9];
+		// fill puzzle with zeros
+		for (int row = 0; row < puzzle.length; row++)
+			for (int col = 0; col < puzzle[0].length; col++)
+				puzzle[row][col] = 0;
+	}
+	
+	public static void main(String[] args) {
+		SudokuSolver sm = new SudokuSolver();
+		sm.run(args);
+	}
+	
+	public void run(String[] args) {
+		// get the name of the puzzle file
+		String puzzleFile = PUZZLE_FILE;
+		if (args.length > 0) puzzleFile = args[0];
 		
-		// init to all 0's
-		for (int i = 0; i < PUZZLE_SIZE; i++)
-			for (int j = 0; j < PUZZLE_SIZE; j++)
-				puzzle[i][j] = 0;
+		System.out.println("\nSudoku Puzzle Solver");
+		// load the puzzle
+		System.out.println("Loading puzzle file " + puzzleFile);
+		loadPuzzle(puzzleFile);
+		printPuzzle();
+		// solve the puzzle starting in (0,0) spot (upper left)
+		solvePuzzle(0, 0);
+		printPuzzle();
+	}
+	
+	/**	Load the puzzle from a file
+	 *	@param filename		name of puzzle file
+	 */
+	public void loadPuzzle(String filename) {
+		Scanner infile = FileUtils.openToRead(filename);
+		for (int row = 0; row < 9; row++)
+			for (int col = 0; col < 9; col++)
+				puzzle[row][col] = infile.nextInt();
+		infile.close();
 	}
 	
 	/**
@@ -38,14 +74,13 @@ public class SudokuMaker {
 		return rand;
 	}
 	
-	/**
-	 * Creates a sudoku puzzle recusively. Call initially with (0, 0)
-	 * @param row 		Current row to work on.
-	 * @param column	Current column to work on
-	 */
-	public boolean createPuzzle(int row, int column) {
+	/**	Solve the Sudoku puzzle using brute-force method. */
+	public boolean solvePuzzle(int row, int column) {
 		// if row is past the last one, puzzle is done
 		if (row == PUZZLE_SIZE) return true;
+		// if not zero, check the next row/column
+		if (puzzle[row][column] != 0)
+			return column == PUZZLE_SIZE-1 ? solvePuzzle(row + 1, 0) : solvePuzzle(row, column + 1);
 		
 		// create list of random numbers
 		int[] nums = new int[PUZZLE_SIZE];
@@ -72,8 +107,8 @@ public class SudokuMaker {
 			// num is not in row, column, or 3x3 grid
 			if (validNum) {
 				puzzle[row][column] = num;
-				// check createPuzzle with next column or next row and start from 0 col
-				if (column == PUZZLE_SIZE-1 ? createPuzzle(row + 1, 0) : createPuzzle(row, column + 1))
+				// check solvePuzzle with next column or next row and start from 0 col
+				if (column == PUZZLE_SIZE-1 ? solvePuzzle(row + 1, 0) : solvePuzzle(row, column + 1))
 					// puzzle is completed
 					return true;
 				else
@@ -85,6 +120,7 @@ public class SudokuMaker {
 		// no number works in this location, so backtrack
 		return false;
 	}
+	
 		
 	/**
 	 *	printPuzzle - prints the Sudoku puzzle with borders
@@ -108,11 +144,5 @@ public class SudokuMaker {
 			else
 				System.out.print("  |\n");
 		}
-	}
-	
-	public static void main(String[] args) {
-		SudokuMaker sm = new SudokuMaker();
-		sm.createPuzzle(0, 0);
-		sm.printPuzzle();
 	}
 }
