@@ -393,6 +393,109 @@ public class Picture extends SimplePicture
     return result;
   }
   
+  /**
+   * Method to shift the picture and wrap it around.
+   * @param	percent	Percent of the image width to shift it to the right
+   */
+  public Picture shiftRight(int percent)
+  {
+    Pixel[][] pixels = this.getPixels2D();
+    Picture result = new Picture(pixels.length, pixels[0].length);
+    Pixel[][] resultPixels = result.getPixels2D();
+    
+    for (int i = 0; i < pixels.length; i++)
+    {
+      for (int j = 0; j < pixels[0].length; j++)
+      {
+		int x = (int)(j - pixels[0].length * (percent/100.0));
+		if (x < 0) x += pixels[0].length;
+		
+        resultPixels[i][j].setRed(pixels[i][x].getRed());
+        resultPixels[i][j].setBlue(pixels[i][x].getBlue());
+        resultPixels[i][j].setGreen(pixels[i][x].getGreen());
+      }
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Method to shift the picture right in a step-wise fashion
+   * @param	shiftCount	Amount to shift right on each steps
+   * @param steps		Total number of steps to shift with
+   */
+  public Picture stairStep(int shiftCount, int steps)
+  {
+    Pixel[][] pixels = this.getPixels2D();
+    Picture result = new Picture(pixels.length, pixels[0].length);
+    Pixel[][] resultPixels = result.getPixels2D();
+    
+    for (int i = 0; i < pixels.length; i++)
+    {
+      for (int j = 0; j < pixels[0].length; j++)
+      {
+		int x = (int)(j - shiftCount * (int)(i / ((double)pixels.length / steps)));
+		if (x < 0) x += pixels[0].length;
+		
+        resultPixels[i][j].setRed(pixels[i][x].getRed());
+        resultPixels[i][j].setBlue(pixels[i][x].getBlue());
+        resultPixels[i][j].setGreen(pixels[i][x].getGreen());
+      }
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Method to turn the picture clockwise 90 degrees
+   */
+  public Picture turn90()
+  {
+    Pixel[][] pixels = this.getPixels2D();
+    Picture result = new Picture(pixels[0].length, pixels.length);
+    Pixel[][] resultPixels = result.getPixels2D();
+    
+    for (int i = 0; i < pixels.length; i++)
+    {
+      for (int j = 0; j < pixels[0].length; j++)
+      {
+		int x = j;
+		int y = pixels.length - i - 1;
+		
+        resultPixels[x][y].setRed(pixels[i][j].getRed());
+        resultPixels[x][y].setBlue(pixels[i][j].getBlue());
+        resultPixels[x][y].setGreen(pixels[i][j].getGreen());
+      }
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Method to zoom the picture in the upper left quarter
+   */
+  public Picture zoomUpperLeft()
+  {
+    Pixel[][] pixels = this.getPixels2D();
+    Picture result = new Picture(pixels.length, pixels[0].length);
+    Pixel[][] resultPixels = result.getPixels2D();
+    
+    for (int i = 0; i < pixels.length; i++)
+    {
+      for (int j = 0; j < pixels[0].length; j++)
+      {
+		int x = i / 2;
+		int y = j / 2;
+		
+        resultPixels[i][j].setRed(pixels[x][y].getRed());
+        resultPixels[i][j].setBlue(pixels[x][y].getBlue());
+        resultPixels[i][j].setGreen(pixels[x][y].getGreen());
+      }
+    }
+    
+    return result;
+  }
+  
   
   /* Main method for testing - each class in Java can have a main 
    * method 

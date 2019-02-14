@@ -117,6 +117,33 @@ public class PictureTester
     enhanced.explore();
   }
   
+  /** Method to test stairStep */
+  public static void testStairStep()
+  {
+    Picture motorcycle = new Picture("images/redMotorcycle.jpg");
+    motorcycle.explore();
+    Picture shifted = motorcycle.stairStep(1, 400);
+    shifted.explore();
+  }
+  
+  /** Method to test turn90 */
+  public static void testTurn90()
+  {
+    Picture motorcycle = new Picture("images/redMotorcycle.jpg");
+    motorcycle.explore();
+    Picture shifted = motorcycle.turn90();
+    shifted.explore();
+  }
+  
+  /** Method to test zoomUpperLeft */
+  public static void testZoomUpperLeft()
+  {
+    Picture motorcycle = new Picture("images/arch.jpg");
+    motorcycle.explore();
+    Picture shifted = motorcycle.zoomUpperLeft();
+    shifted.explore();
+  }
+  
   
   /** Main method for testing.  Every class can have a main
     * method in Java */
@@ -133,8 +160,12 @@ public class PictureTester
     //testGrayscale();
     //testFixUnderwater();
     //testPixelate();
-    testBlur();
+    //testBlur();
     //testEnhance();
+    //testShiftRight();
+    //testStairStep();
+    //testTurn90();
+    testZoomUpperLeft();
     //testMirrorVertical();
     //testMirrorTemple();
     //testMirrorArms();
