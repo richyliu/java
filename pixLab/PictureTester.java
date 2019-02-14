@@ -104,17 +104,23 @@ public class PictureTester
   {
     Picture beach = new Picture("images/beach.jpg");
     beach.explore();
-    Picture blurred = beach.blur(10);
-    blurred.explore();
+    beach.blur(10).explore();
   }
   
   /** Method to test enhance */
   public static void testEnhance()
   {
-    Picture beach = new Picture("images/water.jpg");
-    beach.explore();
-    Picture enhanced = beach.enhance(10);
-    enhanced.explore();
+    Picture water = new Picture("images/water.jpg");
+    water.explore();
+    water.enhance(10).explore();
+  }
+  
+  /** Method to test shiftRight */
+  public static void testShiftRight()
+  {
+    Picture motorcycle = new Picture("images/redMotorcycle.jpg");
+    motorcycle.explore();
+    motorcycle.shiftRight(10).explore();
   }
   
   /** Method to test stairStep */
@@ -122,8 +128,7 @@ public class PictureTester
   {
     Picture motorcycle = new Picture("images/redMotorcycle.jpg");
     motorcycle.explore();
-    Picture shifted = motorcycle.stairStep(1, 400);
-    shifted.explore();
+    motorcycle.stairStep(10, 10).explore();
   }
   
   /** Method to test turn90 */
@@ -131,8 +136,7 @@ public class PictureTester
   {
     Picture motorcycle = new Picture("images/redMotorcycle.jpg");
     motorcycle.explore();
-    Picture shifted = motorcycle.turn90();
-    shifted.explore();
+    motorcycle.turn90().explore();
   }
   
   /** Method to test zoomUpperLeft */
@@ -142,6 +146,23 @@ public class PictureTester
     motorcycle.explore();
     Picture shifted = motorcycle.zoomUpperLeft();
     shifted.explore();
+  }
+  
+  /** Method to test tileMirror */
+  public static void testTileMirror()
+  {
+    Picture pic = new Picture("images/butterfly1.jpg");
+    pic.explore();
+    pic.tileMirror().explore();
+  }
+  
+  /** Method to test watermark */
+  public static void testWatermark()
+  {
+    Picture pic = new Picture("images/water.jpg");
+    pic.explore();
+    pic.watermark();
+    pic.explore();
   }
   
   
@@ -165,8 +186,9 @@ public class PictureTester
     //testShiftRight();
     //testStairStep();
     //testTurn90();
-    testZoomUpperLeft();
-    //testMirrorVertical();
+    //testZoomUpperLeft();
+    //testTileMirror();
+    testWatermark();
     //testMirrorTemple();
     //testMirrorArms();
     //testMirrorGull();

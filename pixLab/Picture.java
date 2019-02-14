@@ -459,12 +459,12 @@ public class Picture extends SimplePicture
     {
       for (int j = 0; j < pixels[0].length; j++)
       {
-		int x = j;
-		int y = pixels.length - i - 1;
+		int y = j;
+		int x = pixels.length - i - 1;
 		
-        resultPixels[x][y].setRed(pixels[i][j].getRed());
-        resultPixels[x][y].setBlue(pixels[i][j].getBlue());
-        resultPixels[x][y].setGreen(pixels[i][j].getGreen());
+        resultPixels[y][x].setRed(pixels[i][j].getRed());
+        resultPixels[y][x].setBlue(pixels[i][j].getBlue());
+        resultPixels[y][x].setGreen(pixels[i][j].getGreen());
       }
     }
     
@@ -484,16 +484,69 @@ public class Picture extends SimplePicture
     {
       for (int j = 0; j < pixels[0].length; j++)
       {
-		int x = i / 2;
-		int y = j / 2;
+		int y = i / 2;
+		int x = j / 2;
 		
-        resultPixels[i][j].setRed(pixels[x][y].getRed());
-        resultPixels[i][j].setBlue(pixels[x][y].getBlue());
-        resultPixels[i][j].setGreen(pixels[x][y].getGreen());
+        resultPixels[i][j].setRed(pixels[y][x].getRed());
+        resultPixels[i][j].setBlue(pixels[y][x].getBlue());
+        resultPixels[i][j].setGreen(pixels[y][x].getGreen());
       }
     }
     
     return result;
+  }
+  
+  /**
+   * Method to tile the image into 4 by shrinking it 25% and mirroring it.
+   */
+  public Picture tileMirror()
+  {
+    Pixel[][] pixels = this.getPixels2D();
+    Picture result = new Picture(pixels.length, pixels[0].length);
+    Pixel[][] resultPixels = result.getPixels2D();
+    
+    for (int i = 0; i < pixels.length; i++)
+    {
+      for (int j = 0; j < pixels[0].length; j++)
+      {
+		int y = i;
+		int x = j;
+		if (i < pixels.length/2)
+			y = i*2;
+		else
+			y = (pixels.length - i - 1) * 2;
+		if (j < pixels[0].length/2)
+			x = j*2;
+		else
+			x = (pixels[0].length - j - 1) * 2;
+		
+        resultPixels[i][j].setRed(pixels[y][x].getRed());
+        resultPixels[i][j].setBlue(pixels[y][x].getBlue());
+        resultPixels[i][j].setGreen(pixels[y][x].getGreen());
+      }
+    }
+    
+    return result;
+  }
+  
+  /** Method to add a watermark to the image */
+  public void watermark()
+  {
+    Pixel[][] pixels = this.getPixels2D();
+    for (int i = 0; i < pixels.length; i++)
+    {
+      for (int j = 0; j < pixels[0].length; j++)
+      {
+		int y = i/30;
+		int x = j/30;
+		int offset = y % 4 == 0 ? 20 : -20;
+		if (y % 2 == 0 && x % 2 == 0 && (x + y) % 4 == 0) {
+			pixels[i][j].setRed(offset + pixels[i][j].getRed());
+			pixels[i][j].setBlue(offset + pixels[i][j].getBlue());
+			pixels[i][j].setGreen(offset + pixels[i][j].getGreen());
+		}
+      }
+    }
   }
   
   
