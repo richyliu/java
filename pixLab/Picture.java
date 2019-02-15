@@ -228,6 +228,7 @@ public class Picture extends SimplePicture
     {
       for (Pixel pixelObj : rowArray)
       {
+		// set everything to 0, ignoring blue
         pixelObj.setRed(0);
         pixelObj.setGreen(0);
       }
@@ -242,6 +243,7 @@ public class Picture extends SimplePicture
     {
       for (Pixel pixelObj : rowArray)
       {
+		// invert the pixel by subracting it from 255
         pixelObj.setRed(255 - pixelObj.getRed());
         pixelObj.setGreen(255 - pixelObj.getGreen());
         pixelObj.setBlue(255 - pixelObj.getBlue());
@@ -257,10 +259,10 @@ public class Picture extends SimplePicture
     {
       for (Pixel pixelObj : rowArray)
       {
+		// get the average of red, green, and blue
 		int avg = (int)((pixelObj.getRed() + pixelObj.getGreen() + pixelObj.getBlue()) / 3.0);
-        pixelObj.setRed(avg);
-        pixelObj.setGreen(avg);
-        pixelObj.setBlue(avg);
+		// set the pixel to the average color
+        pixelObj.setColor(new Color(avg, avg, avg));
       }
     }
   }
@@ -296,22 +298,29 @@ public class Picture extends SimplePicture
     Pixel[][] pixels = this.getPixels2D();
     for (int i = 0; i < pixels.length; i++)
     {
+	  // totals for red, green, and blue
 	  double[] totals = new double[]{0, 0, 0};
+	  // number of pixels that have been added
+	  int count = 0;
       for (int j = 0; j < pixels[0].length; j++)
       {
 		if (j % size == 0) {
 			totals = new double[] {0, 0, 0};
+			count = 0;
+			// add centered on the current (i, j) value, using max/min to ensure bounds
 			for (int row = i/size * size; row < Math.min(i/size * size + size, pixels.length); row++) {
 				for (int col = j/size * size; col < Math.min(j/size * size + size, pixels[0].length); col++) {
 					totals[0] += pixels[row][col].getRed();
 					totals[1] += pixels[row][col].getGreen();
 					totals[2] += pixels[row][col].getBlue();
+					count++;
 				}
 			}
 		}
-        pixels[i][j].setRed((int)(totals[0]/(size*size)));
-        pixels[i][j].setGreen((int)(totals[1]/(size*size)));
-        pixels[i][j].setBlue((int)(totals[2]/(size*size)));
+		// set the pixels values to the average
+        pixels[i][j].setRed((int)(totals[0]/count));
+        pixels[i][j].setGreen((int)(totals[1]/count));
+        pixels[i][j].setBlue((int)(totals[2]/count));
       }
       if (i % 50 == 0) {
 		  System.out.printf("[pixelate]: %.1f%%\n", (double)i/pixels.length * 100);
@@ -334,8 +343,11 @@ public class Picture extends SimplePicture
     {
       for (int j = 0; j < pixels[0].length; j++)
       {
+		// totals for red, green, and blue
 		int[] totals = new int[]{0, 0, 0};
+		// number of pixels that have been added
 		int count = 0;
+		// add centered on the current (i, j) value, using max/min to ensure bounds
 		for (int row = Math.max(i-size/2, 0); row < Math.min(i-size/2+size, pixels.length); row++) {
 			for (int col = Math.max(j-size/2, 0); col < Math.min(j-size/2+size, pixels[0].length); col++) {
 				totals[0] += pixels[row][col].getRed();
@@ -344,10 +356,12 @@ public class Picture extends SimplePicture
 				count++;
 			}
 		}
+		// set the pixels values to the average
         resultPixels[i][j].setRed(totals[0]/count);
         resultPixels[i][j].setGreen(totals[1]/count);
         resultPixels[i][j].setBlue(totals[2]/count);
       }
+      // print progress statements
       if (i % 50 == 0) {
 		  System.out.printf("[blur]: %.1f%%\n", (double)i/pixels.length * 100);
 	  }
@@ -371,8 +385,11 @@ public class Picture extends SimplePicture
     {
       for (int j = 0; j < pixels[0].length; j++)
       {
+		// totals for red, green, and blue
 		int[] totals = new int[]{0, 0, 0};
+		// number of pixels that have been added
 		int count = 0;
+		// add centered on the current (i, j) value, using max/min to ensure bounds
 		for (int row = Math.max(i-size/2, 0); row < Math.min(i-size/2+size, pixels.length); row++) {
 			for (int col = Math.max(j-size/2, 0); col < Math.min(j-size/2+size, pixels[0].length); col++) {
 				totals[0] += pixels[row][col].getRed();
@@ -381,10 +398,12 @@ public class Picture extends SimplePicture
 				count++;
 			}
 		}
+		// set the pixels values by multiplying original by 2 and subracting average
         resultPixels[i][j].setRed(2 * pixels[i][j].getRed() - totals[0]/count);
         resultPixels[i][j].setGreen(2 * pixels[i][j].getGreen() - totals[1]/count);
         resultPixels[i][j].setBlue(2 * pixels[i][j].getBlue() - totals[2]/count);
       }
+      // print progress statements
       if (i % 50 == 0) {
 		  System.out.printf("[enhance]: %.1f%%\n", (double)i/pixels.length * 100);
 	  }
@@ -407,12 +426,12 @@ public class Picture extends SimplePicture
     {
       for (int j = 0; j < pixels[0].length; j++)
       {
+		// shift the image by the percentage
 		int x = (int)(j - pixels[0].length * (percent/100.0));
+		// wrap around if necessary
 		if (x < 0) x += pixels[0].length;
 		
-        resultPixels[i][j].setRed(pixels[i][x].getRed());
-        resultPixels[i][j].setBlue(pixels[i][x].getBlue());
-        resultPixels[i][j].setGreen(pixels[i][x].getGreen());
+        resultPixels[i][j].setColor(pixels[i][x].getColor());
       }
     }
     
@@ -434,12 +453,12 @@ public class Picture extends SimplePicture
     {
       for (int j = 0; j < pixels[0].length; j++)
       {
+		// get the current stair step, and multiply by shiftCount to get shift width
 		int x = (int)(j - shiftCount * (int)(i / ((double)pixels.length / steps)));
+		// wrap around if necessary
 		if (x < 0) x += pixels[0].length;
 		
-        resultPixels[i][j].setRed(pixels[i][x].getRed());
-        resultPixels[i][j].setBlue(pixels[i][x].getBlue());
-        resultPixels[i][j].setGreen(pixels[i][x].getGreen());
+        resultPixels[i][j].setColor(pixels[i][x].getColor());
       }
     }
     
@@ -459,12 +478,11 @@ public class Picture extends SimplePicture
     {
       for (int j = 0; j < pixels[0].length; j++)
       {
+		// swap x and y and invert x to rotate the image
 		int y = j;
 		int x = pixels.length - i - 1;
 		
-        resultPixels[y][x].setRed(pixels[i][j].getRed());
-        resultPixels[y][x].setBlue(pixels[i][j].getBlue());
-        resultPixels[y][x].setGreen(pixels[i][j].getGreen());
+        resultPixels[y][x].setColor(pixels[i][j].getColor());
       }
     }
     
@@ -484,12 +502,8 @@ public class Picture extends SimplePicture
     {
       for (int j = 0; j < pixels[0].length; j++)
       {
-		int y = i / 2;
-		int x = j / 2;
-		
-        resultPixels[i][j].setRed(pixels[y][x].getRed());
-        resultPixels[i][j].setBlue(pixels[y][x].getBlue());
-        resultPixels[i][j].setGreen(pixels[y][x].getGreen());
+		// divide x & y by 2 to get upper left corner
+        resultPixels[i][j].setColor(pixels[i/2][j/2].getColor());
       }
     }
     
@@ -511,18 +525,18 @@ public class Picture extends SimplePicture
       {
 		int y = i;
 		int x = j;
+		// reduce by factor of 2 and flip if necessary
 		if (i < pixels.length/2)
 			y = i*2;
 		else
 			y = (pixels.length - i - 1) * 2;
+		// same thing in the x direction
 		if (j < pixels[0].length/2)
 			x = j*2;
 		else
 			x = (pixels[0].length - j - 1) * 2;
 		
-        resultPixels[i][j].setRed(pixels[y][x].getRed());
-        resultPixels[i][j].setBlue(pixels[y][x].getBlue());
-        resultPixels[i][j].setGreen(pixels[y][x].getGreen());
+        resultPixels[i][j].setColor(pixels[y][x].getColor());
       }
     }
     
@@ -549,6 +563,88 @@ public class Picture extends SimplePicture
     }
   }
   
+  /** Method to detect edges by comparing each pixel to the pixel below */
+  public Picture edgeDetectionBelow(int threashold)
+  {
+    Pixel[][] pixels = this.getPixels2D();
+    Picture result = new Picture(pixels.length, pixels[0].length);
+    Pixel[][] resultPixels = result.getPixels2D();
+
+    for (int i = 0; i < pixels.length-1; i++)
+    {
+      for (int j = 0; j < pixels[0].length; j++)
+      {
+		int val = 255;
+		// set pixel to black if edge detected by difference in colors
+		if (pixels[i][j].colorDistance(pixels[i+1][j].getColor()) > threashold)
+			val = 0;
+		
+        resultPixels[i][j].setRed(val);
+        resultPixels[i][j].setBlue(val);
+        resultPixels[i][j].setGreen(val);
+      }
+    }
+    
+    return result;
+  }
+  
+  /** Method to make a green screen */
+  public Picture greenScreen()
+  {
+	// the 2 images to impose on the background
+    Picture pic1 = new Picture("images/kitten1GreenScreen.jpg");
+    Picture pic2 = new Picture("images/mouse1GreenScreen.jpg");
+    // the background
+    Picture background = new Picture("images/IndoorHouseLibraryBackground.jpg");
+    Pixel[][] pixels1 = pic1.getPixels2D();
+    Pixel[][] pixels2 = pic2.getPixels2D();
+    Pixel[][] bg = background.getPixels2D();
+    // hold the final picture
+    Picture resultPicture = new Picture(bg.length, bg[0].length);
+    Pixel[][] result = resultPicture.getPixels2D();
+    
+    // where to position the images
+    int offset1y = 300;
+    int offset1x = 500;
+    int offset2y = 480;
+    int offset2x = 180;
+    Color green = new Color(51, 204, 51);
+    int greenThreashold = 100;
+
+    for (int i = 0; i < bg.length-1; i++)
+    {
+      for (int j = 0; j < bg[0].length; j++)
+      {
+		// start by setting the result to the backgroun
+        result[i][j].setColor(bg[i][j].getColor());
+        // later can overwrite it with the cat/mouse image
+		
+		// put the first image on
+		if (
+			// if y values are within bounds
+			i > offset1y && i < offset1y + pixels1.length &&
+			// and x values are within bounds
+			j > offset1x && j < offset1x + pixels1[0].length &&
+			// and pixel is not green-ish
+			pixels1[i-offset1y][j-offset1x].colorDistance(green) > greenThreashold) {
+			result[i][j].setColor(pixels1[i-offset1y][j-offset1x].getColor());
+		}
+		
+		// put the second image on
+		if (
+			// if y values are within bounds
+			i > offset2y && i < offset2y + pixels2.length &&
+			// and x values are within bounds
+			j > offset2x && j < offset2x + pixels2[0].length &&
+			// and pixel is not green-ish
+			pixels2[i-offset2y][j-offset2x].colorDistance(green) > greenThreashold) {
+			result[i][j].setColor(pixels2[i-offset2y][j-offset2x].getColor());
+		}
+      }
+    }
+    
+    return resultPicture;
+  }
   
   /* Main method for testing - each class in Java can have a main 
    * method 

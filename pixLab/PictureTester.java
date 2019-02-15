@@ -156,13 +156,19 @@ public class PictureTester
     pic.tileMirror().explore();
   }
   
-  /** Method to test watermark */
-  public static void testWatermark()
+  /** Method to test edgeDetectionBelow */
+  public static void testEdgeDetectionBelow()
   {
-    Picture pic = new Picture("images/water.jpg");
+    Picture pic = new Picture("images/swan.jpg");
     pic.explore();
-    pic.watermark();
-    pic.explore();
+    pic.edgeDetectionBelow(20).explore();
+  }
+  
+  /** Method to test greenScreen */
+  public static void testGreenScreen()
+  {
+    Picture pic = new Picture("images/kitten1GreenScreen.jpg");
+    pic.greenScreen().explore();
   }
   
   
@@ -188,7 +194,9 @@ public class PictureTester
     //testTurn90();
     //testZoomUpperLeft();
     //testTileMirror();
-    testWatermark();
+    //testWatermark()
+    //testEdgeDetectionBelow();
+    testGreenScreen();
     //testMirrorTemple();
     //testMirrorArms();
     //testMirrorGull();
