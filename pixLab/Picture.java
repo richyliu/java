@@ -594,11 +594,9 @@ public class Picture extends SimplePicture
 	// the 2 images to impose on the background
     Picture pic1 = new Picture("images/kitten1GreenScreen.jpg");
     Picture pic2 = new Picture("images/mouse1GreenScreen.jpg");
-    // the background
-    Picture background = new Picture("images/IndoorHouseLibraryBackground.jpg");
     Pixel[][] pixels1 = pic1.getPixels2D();
     Pixel[][] pixels2 = pic2.getPixels2D();
-    Pixel[][] bg = background.getPixels2D();
+    Pixel[][] bg = this.getPixels2D();
     // hold the final picture
     Picture resultPicture = new Picture(bg.length, bg[0].length);
     Pixel[][] result = resultPicture.getPixels2D();

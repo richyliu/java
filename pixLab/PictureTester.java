@@ -167,7 +167,7 @@ public class PictureTester
   /** Method to test greenScreen */
   public static void testGreenScreen()
   {
-    Picture pic = new Picture("images/kitten1GreenScreen.jpg");
+    Picture pic = new Picture("images/IndoorHouseLibraryBackground.jpg");
     pic.greenScreen().explore();
   }
   
