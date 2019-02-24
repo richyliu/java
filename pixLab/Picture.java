@@ -646,6 +646,39 @@ public class Picture extends SimplePicture
     return resultPicture;
   }
   
+  /**
+   * Method to rotate the image by a certain degree
+   */
+  public Picture rotate(double theta)
+  {
+    Pixel[][] pixels = this.getPixels2D();
+    Picture result = new Picture(pixels.length, pixels[0].length);
+    Pixel[][] resultPixels = result.getPixels2D();
+    
+    double cy = pixels[0].length/2;
+    double cx = pixels.length/2;
+    double l = Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2));
+    double beta = theta + Math.atan2(cy, cx);
+    
+    // offset of top left corner of rotated image
+    int offsety = (int)(cy - l * Math.sin(beta));
+    int offsetx = (int)(cx - l * Math.cos(beta));
+    
+    for (int i = -offsety; i < pixels.length; i++)
+    {
+      for (int j = -offsetx; j < pixels[0].length; j++)
+      {
+		int y = (int)(i * Math.cos(theta) - j * Math.sin(theta));
+		int x = (int)(i * Math.sin(theta) + j * Math.cos(theta));
+		
+		if (y >= 0 && y < pixels.length && x >= 0 && x < pixels[0].length && i+offsety < pixels.length && j+offsetx < pixels[0].length)
+			resultPixels[i+offsety][j+offsetx].setColor(pixels[y][x].getColor());
+      }
+    }
+    
+    return result;
+  }
+  
   /* Main method for testing - each class in Java can have a main 
    * method 
    */

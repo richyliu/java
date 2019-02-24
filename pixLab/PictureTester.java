@@ -171,6 +171,13 @@ public class PictureTester
     pic.greenScreen().explore();
   }
   
+  /** Method to test rotate */
+  public static void testRotate()
+  {
+    Picture pic = new Picture("images/beach.jpg");
+    pic.rotate(Math.PI * 3.0/2).explore();
+  }
+  
   
   /** Main method for testing.  Every class can have a main
     * method in Java */
@@ -196,7 +203,8 @@ public class PictureTester
     //testTileMirror();
     //testWatermark()
     //testEdgeDetectionBelow();
-    testGreenScreen();
+    //testGreenScreen();
+    testRotate();
     //testMirrorTemple();
     //testMirrorArms();
     //testMirrorGull();
