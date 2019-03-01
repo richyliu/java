@@ -47,12 +47,29 @@ public class SimpleCalc {
 	public void runCalc() {
 		String input = "";
 
+		// while user has not tried to quit
 		while (!input.equals("q")) {
+			// get input
 			input = Prompt.getString("");
+			// print help if user requests it
 			if (input.equals("h"))
 				printHelp();
-			else if (!input.equals("q") && isValid(input))
-				System.out.println(GREEN + evaluateExpression(utils.tokenizeExpression(input)) + RESET);
+			// if not quitting and input has text
+			else if (!input.equals("q") && input.length() > 0)
+				// only process if input is valid
+				if (isValid(input)) {
+					// tokenize the input and evaluate it
+					double result = evaluateExpression(utils.tokenizeExpression(input));
+					// truncate to 9 decimal places
+					result = Math.floor(result * 1e9) / 1e9;
+					// print result
+					if (DEBUG)
+						System.out.println(GREEN + "Result: " + result + RESET);
+					else
+						System.out.println(result);
+				// print invalid input
+				} else if (DEBUG)
+					System.out.println(RED + "Invalid input" + RESET);
 		}
 	}
 
@@ -72,27 +89,39 @@ public class SimpleCalc {
 	 *	@return			a double value of the evaluated expression
 	 */
 	public double evaluateExpression(List<String> tokens) {
+		if (DEBUG)
+			System.out.printf("%s         %-30s%-30s%s\n", BLUE, "Value stack", "Operator stack", RESET);
+		
+		// loop through the tokens
 		for (String token : tokens) {
+			// if current token is operator
 			if (token.length() == 1 && utils.isOperator(token.charAt(0))) {
-				// current token is an operator
-				if (operatorStack.isEmpty()) {
+				// currently no operator on the stack, must push current one
+				// or if left paren, push onto operator stack to be used as a marker
+				// or if both ops are powers, push it and do it later
+				if (
+						operatorStack.isEmpty() ||
+						token.equals("(") ||
+						token.equals("^") && operatorStack.peek().equals("^")) {
 					operatorStack.push(token);
-				} else if (token.equals("(")) {   
-					operatorStack.push(token);
+				// once right paren is reached, ...
 				} else if (token.equals(")")) {
+					// ... do all the operations until the left paren
 					while (!operatorStack.peek().equals("("))
 						doOp();
+					// then remove the left paren
 					operatorStack.pop();
-				} else if (token.equals("^") && operatorStack.peek().equals("^")) {
-					doOp();
-					operatorStack.push(token);
+				// if left op has precedence, do it first ...
 				} else if (hasPrecedence(token, operatorStack.peek())) {
 					doOp();
+					// ... then push the current op
 					operatorStack.push(token);
+				// otherwise just push the token
 				} else {
 					operatorStack.push(token);
 				}
-			} else {				
+			// otherwise it must be a number
+			} else {
 				try {
 					// current token is a number, push onto value stack 
 					valueStack.push(Double.parseDouble(token));
@@ -101,9 +130,11 @@ public class SimpleCalc {
 				}
 			}
 		}
+		// if there are still operators that need to be done, do them
 		while (!operatorStack.isEmpty())
 			doOp();
 
+		// the last value is the result
 		return valueStack.pop();
 	}
 
@@ -113,14 +144,16 @@ public class SimpleCalc {
 	 */
 	private void doOp() {
 		if (DEBUG)
-			System.out.printf("%s[debug]: %-30s%-30s\n%s", BLUE, valueStack, operatorStack, RESET);
+			System.out.printf("%s[debug]: %-30s%-30s%s\n", BLUE, valueStack, operatorStack, RESET);
 
+		// get operators in correct order
 		double b = valueStack.pop();
 		double a = valueStack.pop();
+		// do the operation and oush back onto value stack
 		valueStack.push(resolveOp(a, b, operatorStack.pop().charAt(0)));
 
 		if (DEBUG)
-			System.out.printf("%s[debug]: %-30s%-30s\n%s", BLUE, valueStack, operatorStack, RESET);
+			System.out.printf("%s[debug]: %-30s%-30s%s\n", BLUE, valueStack, operatorStack, RESET);
 	}
 
 	/**
@@ -132,6 +165,7 @@ public class SimpleCalc {
 	 * @return		Result of calculation
 	 */
 	private double resolveOp(double a, double b, char op) {
+		// do the actual operation based on the operator
 		switch (op) {
 			case '+': return a + b;
 			case '-': return a - b;
@@ -140,23 +174,31 @@ public class SimpleCalc {
 			case '%': return a % b;
 			case '^': return Math.pow(a, b);
 			default:
-					  System.err.println(RED + "ERROR encountered unknown operation: " + op + RESET);
-					  return 0;
+				System.err.println(RED + "ERROR encountered unknown operation: " + op + RESET);
+				return 0;
 		}
 	}
 
 	/**
 	 * Checks if the input string is a valid math expression that can be
-	 * processed using a dumb regex filter. Some edge cases that get accepted
-	 * are:
-	 *		(3 + 2))	<-- unbalanced parentheses
+	 * processed using a dumb regex filter and parenthesis balance checking
 	 * 
 	 * @param input	Input string from user
 	 * @return		Whether input is valid or not
 	 */
 	private boolean isValid(String input) {
-		if (input.length() < 1) return false;
-		return input.replaceAll(" ", "").matches("(\\(*[\\d.]+\\)*[-+*/%\\^]\\)*)*\\(*[\\d.]+\\)*");
+		if (input
+			.replaceAll("\\s", "")
+			.matches("(\\(*[\\d.]+\\)*[-+*/%\\^]\\)*)*\\(*[\\d.]+\\)*")) {
+			int depth = 0;
+			for (int i = 0; i < input.length(); i++) {
+				if (input.charAt(i) == '(') depth++;
+				else if (input.charAt(i) == ')') depth--;
+			}
+
+			return depth == 0;
+		} else
+			return false;
 	}
 
 	/**
