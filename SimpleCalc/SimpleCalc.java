@@ -1,7 +1,13 @@
 import java.util.List;		// used by expression evaluator
+import java.util.HashMap;	// used to store variables
+import java.util.Map;		// used to store variables
+import java.util.Set;
 
 /**
- *	<Description goes here>
+ *	A simple calculator that takes in user input and computes the output. This
+ * 	accepts the symbols "+", "-", "/", "*", "%", and "^". This calculator also
+ * 	works with variables, declaring them with the "=" operator. Variables can
+ * 	only contain letters and are case sensitive.
  *
  *	@author	Richard Liu
  *	@since	Feb. 26, 2019
@@ -12,6 +18,7 @@ public class SimpleCalc {
 
 	private ArrayStack<Double> valueStack;		// value stack
 	private ArrayStack<String> operatorStack;	// operator stack
+	private Map<String, Identifier> variables;		// variables map
 
 	private static final boolean DEBUG = false;
 
@@ -27,6 +34,11 @@ public class SimpleCalc {
 		valueStack = new ArrayStack<Double>();
 		operatorStack = new ArrayStack<String>();
 		utils = new ExprUtils();
+
+		// initialize variables with pi and e
+		variables = new HashMap<String, Identifier>();
+		variables.put("pi", new Identifier("pi", Math.PI));
+		variables.put("e", new Identifier("e", Math.E));
 	}
 
 	public static void main(String[] args) {
@@ -34,6 +46,9 @@ public class SimpleCalc {
 		sc.run();
 	}
 
+	/**
+	 * Main method, calls the runCalc to do most of the work
+	 */
 	public void run() {
 		System.out.println(WHITE + BG_BLACK + "\nWelcome to SimpleCalc!!!" + RESET);
 		runCalc();
@@ -54,22 +69,38 @@ public class SimpleCalc {
 			// print help if user requests it
 			if (input.equals("h"))
 				printHelp();
+			// list the variables
+			else if (input.equals("l")) {
+				System.out.println("\nVariables:");
+				// get the keys (which are the variable names)
+				Set<String> names = variables.keySet();
+				for (String name : names)
+					System.out.printf("    %-10s=%10f\n", name, variables.get(name).getValue());
 			// if not quitting and input has text
-			else if (!input.equals("q") && input.length() > 0)
+			} else if (!input.equals("q") && input.length() > 0) {
 				// only process if input is valid
 				if (isValid(input)) {
 					// tokenize the input and evaluate it
-					double result = evaluateExpression(utils.tokenizeExpression(input));
-					// truncate to 9 decimal places
-					result = Math.floor(result * 1e9) / 1e9;
+					List<String> tokens = utils.tokenizeExpression(input);
+					// put the result into a variable if doing assignment
+					double result = 0;
+					if (tokens.size() >= 3 && tokens.get(1).equals("=") && tokens.get(0).matches("[a-zA-Z]+")) {
+						result = evaluateExpression(tokens.subList(2, tokens.size()));
+						variables.put(tokens.get(0), new Identifier(tokens.get(0), result));
+					} else
+						result = evaluateExpression(tokens);
+					// truncate to 6 decimal places
+					result = Math.floor(result * 1e6) / 1e6;
 					// print result
 					if (DEBUG)
 						System.out.println(GREEN + "Result: " + result + RESET);
 					else
 						System.out.println(result);
 				// print invalid input
-				} else if (DEBUG)
+				} else if (DEBUG) {
 					System.out.println(RED + "Invalid input" + RESET);
+				}
+			}
 		}
 	}
 
@@ -91,7 +122,7 @@ public class SimpleCalc {
 	public double evaluateExpression(List<String> tokens) {
 		if (DEBUG)
 			System.out.printf("%s         %-30s%-30s%s\n", BLUE, "Value stack", "Operator stack", RESET);
-		
+
 		// loop through the tokens
 		for (String token : tokens) {
 			// if current token is operator
@@ -99,10 +130,7 @@ public class SimpleCalc {
 				// currently no operator on the stack, must push current one
 				// or if left paren, push onto operator stack to be used as a marker
 				// or if both ops are powers, push it and do it later
-				if (
-						operatorStack.isEmpty() ||
-						token.equals("(") ||
-						token.equals("^") && operatorStack.peek().equals("^")) {
+				if (operatorStack.isEmpty() || token.equals("(")) {
 					operatorStack.push(token);
 				// once right paren is reached, ...
 				} else if (token.equals(")")) {
@@ -121,7 +149,17 @@ public class SimpleCalc {
 				} else {
 					operatorStack.push(token);
 				}
-			// otherwise it must be a number
+			// otherwise it could be an variable
+			} else if (token.matches("[a-zA-Z]+")) {
+				// get the variable value and push it onto the valueStack
+				Identifier variable = variables.get(token);
+				if (variable != null)
+					valueStack.push(variable.getValue());
+				else {
+					valueStack.push(0.0);
+					System.err.println(RED + "ERROR undefined variable: " + token + RESET);
+				}
+			// or a number
 			} else {
 				try {
 					// current token is a number, push onto value stack 
@@ -182,15 +220,19 @@ public class SimpleCalc {
 
 	/**
 	 * Checks if the input string is a valid math expression that can be
-	 * processed using a dumb regex filter and parenthesis balance checking
+	 * processed using a regex filter and parenthesis balance checking.
 	 * 
 	 * @param input	Input string from user
 	 * @return		Whether input is valid or not
 	 */
 	private boolean isValid(String input) {
+		// check if input is valid
 		if (input
+			// remove all spaces
 			.replaceAll("\\s", "")
-			.matches("(\\(*[\\d.]+\\)*[-+*/%\\^]\\)*)*\\(*[\\d.]+\\)*")) {
+			// this regex checks for validity
+			.matches("([a-zA-Z]+=)?(\\(*([\\d.]+|[a-zA-Z]+)\\)*[-+*/%\\^]\\)*)*\\(*([\\d.]+|[a-zA-Z]+)\\)*")) {
+			// check for parenthesis balancing
 			int depth = 0;
 			for (int i = 0; i < input.length(); i++) {
 				if (input.charAt(i) == '(') depth++;
