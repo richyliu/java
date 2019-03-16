@@ -113,7 +113,8 @@ public class SimpleCalc {
 					operatorStack.pop();
 				// if left op has precedence, do it first ...
 				} else if (hasPrecedence(token, operatorStack.peek())) {
-					doOp();
+					while (!operatorStack.isEmpty() && hasPrecedence(token, operatorStack.peek()))
+						doOp();
 					// ... then push the current op
 					operatorStack.push(token);
 				// otherwise just push the token
