@@ -30,33 +30,75 @@ public class BigData {
    * Main run file that is called
    */
   public void run() {
+    System.out.print("Loading databases...");
     readFile();
-    System.out.printf("Database loaded. Number of entries: %5d\n", contents.size());
+    System.out.printf("\rDatabase loaded. Number of entries: %5d\n", contents.size());
 
     searchSystem();
+    System.out.println("\nThank you for using Education.csv search system.");
   }
 
   public void searchSystem() {
     boolean quit = false;
 
-    System.out.println("Welcome to the search system for Education.csv");
-    System.out.println("This program will print a histogram of the data header that you select\n\n");
+    System.out.println("\nWelcome to the search system for Education.csv");
+    System.out.println("Usage:\n\tPress s for scatter plot mode\n\tPress h for histogram mode\n\tPress q to quit\n");
 
     while (!quit) {
-      for (int i = 0; i < this.headers.size(); i++)
-        System.out.printf("[%2d]: %s\n", i, this.headers.get(i));
-      int headerIndex = -2;
-      while (headerIndex == -2)
-        headerIndex = Prompt.getInt("Select a header, or enter -1 to exit");
-      if (headerIndex == -1)
+      String input = "";
+      while (input.length() == 0)
+        input = Prompt.getString("s = scatter plot, h = histogram, q = quit");
+
+      if (input.equals("q"))
         quit = true;
-      else {
-        Stats s = new Stats(this.headers.get(headerIndex), contents);
-        System.out.println(s.histogram());
-        System.out.println(s);
-        Prompt.getString("Press enter to continue");
-      }
+      else if (input.equals("h"))
+        searchHistogram();
+      else if (input.equals("s"))
+        searchScatter();
     }
+  }
+
+  /** Prompt the user for histogram display */
+  public boolean searchHistogram() {
+    // print header
+    for (int i = 0; i < this.headers.size(); i++)
+      System.out.printf("[%2d]: %s\n", i+1, this.headers.get(i));
+
+    int headerIndex = -1;
+    while (headerIndex == -1)
+      headerIndex = Prompt.getInt("[histog] -- Select a header, or enter 0 to exit histogram mode");
+    if (headerIndex == 0)
+      return true;
+
+    Stats s = new Stats(this.headers.get(headerIndex - 1), contents);
+    System.out.println(s.histogram());
+    System.out.println(s);
+    Prompt.getString("[histog] -- Press enter to continue");
+
+    return searchHistogram();
+  }
+
+  /** Prompt the user for scatter plot display */
+  public boolean searchScatter() {
+    // print header
+    for (int i = 0; i < this.headers.size(); i++)
+      System.out.printf("[%2d]: %s\n", i+1, this.headers.get(i));
+
+    int[] headersIndex = new int[]{-1, -1};
+    while (headersIndex[0] == -1)
+      headersIndex[0] = Prompt.getInt("[scatter] -- Select a header for the y axis, or enter 0 to exit scatter plot mode");
+    if (headersIndex[0] == 0)
+      return true;
+    while (headersIndex[1] == -1)
+      headersIndex[1] = Prompt.getInt("[scatter] -- Select a header for the x axis, or enter 0 to exit scatter plot mode");
+    if (headersIndex[1] == 0)
+      return true;
+
+    System.out.println("\n");
+    System.out.println(Stats.scatter(this.headers.get(headersIndex[0] - 1), this.headers.get(headersIndex[1] - 1), contents));
+    Prompt.getString("[scatter] -- Press enter to continue");
+
+    return searchScatter();
   }
 
   /**
@@ -276,7 +318,10 @@ class Entry {
 class Stats {
   // histogram settings
   public static final int NUM_BINS = 50;
-  public static final int HEIGHT = 15;
+  public static final int HIST_HEIGHT = 15;
+  // scatter plot settings
+  public static final int SCATTER_HEIGHT = 20;
+  public static final int SCATTER_WIDTH = 60;
 
   private String header;
   private double average;
@@ -316,6 +361,7 @@ class Stats {
   public double getMedian() { return median; }
   public double getRange() { return range; }
 
+
   public String histogram() {
     // height of each bin of the histogram
     double[] bins = new double[NUM_BINS];
@@ -335,7 +381,7 @@ class Stats {
     // the number of characters high each bin of the histogram is
     int[] printedBins = new int [NUM_BINS];
     for (int i = 0; i < NUM_BINS; i++)
-      printedBins[i] = (int)(bins[i]/max * HEIGHT);
+      printedBins[i] = (int)(bins[i]/max * HIST_HEIGHT);
 
     // generate the actual histogram
 
@@ -346,9 +392,9 @@ class Stats {
     str += "┓\n";
 
     // content
-    for (int i = HEIGHT; i >= 0; i--) {
+    for (int i = HIST_HEIGHT; i >= 0; i--) {
       if (i % 3 == 0)
-        str += String.format("%12.2f |", (double)i/HEIGHT * max);
+        str += String.format("%12.2f |", (double)i/HIST_HEIGHT * max);
       else
         str += "             |";
       for (int bin : printedBins) {
@@ -372,7 +418,78 @@ class Stats {
     return str;
   }
 
+  public static String scatter(String header1, String header2, List<Entry> contents) {
+    Stats data1 = new Stats(header1, contents);
+    Stats data2 = new Stats(header2, contents);
+
+    List<Pair<Double>> data = new ArrayList<Pair<Double>>();
+    for (Entry entry : contents) {
+      Double a = entry.get(header1);
+      Double b = entry.get(header2);
+      if (a != null && b != null)
+        data.add(new Pair<Double>(a, b));
+    }
+
+    int[][] scatter = new int[SCATTER_HEIGHT][SCATTER_WIDTH];
+    for (Pair<Double> p : data) {
+      int y = (int)((p.x - data1.getLow())/(double)(data1.getRange() + 0.01) * SCATTER_HEIGHT);
+      y = SCATTER_HEIGHT - y - 1;
+      int x = (int)((p.y - data2.getLow())/(double)(data2.getRange() + 0.01) * SCATTER_WIDTH);
+      scatter[y][x]++;
+    }
+
+    int max = 0;
+    for (int[] row : scatter)
+      for (int square : row)
+        max = Math.max(max, square);
+
+    String str = "";
+
+    // header
+    str += header1;
+    str += "\n                        vs\n";
+    str += header2;
+    str += "\n";
+    for (int i = 0; i < SCATTER_WIDTH+2; i++)
+      str += "-";
+    str += "\n";
+
+    // content
+    for (int i = 0; i < SCATTER_HEIGHT; i++) {
+      str += "|";
+      for (int j = 0; j < SCATTER_WIDTH; j++) {
+        int cur = scatter[i][j];
+        if (cur > max*2/3)
+          str += "@";
+        else if (cur > max/3)
+          str += "*";
+        else if (cur > 0)
+          str += ".";
+        else
+          str += " ";
+      }
+      str += "|\n";
+    }
+
+    // footer
+    for (int i = 0; i < SCATTER_WIDTH+2; i++)
+      str += "-";
+    str += "\n";
+
+    return str;
+  }
+
   public String toString() {
     return String.format("Average: %-10.2f Low: %-10.2f High: %-10.2f Median: %-10.2f Range: %-10.2f", average, low, high, median, range);
+  }
+}
+
+
+class Pair<E> {
+  public E x;
+  public E y;
+  public Pair(E x, E y) {
+    this.x = x;
+    this.y = y;
   }
 }
