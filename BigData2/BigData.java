@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 
 public class BigData {
   // number of columns in the csv
@@ -11,7 +12,10 @@ public class BigData {
   private Scanner input;
   // entries in the csv file
   private List<Entry> contents;
-  
+  // usa has separate data
+  private Entry usa;
+  private List<String> headers;
+
   public BigData() {
     input = FileUtils.openToRead("Education.csv");
     contents = new ArrayList<Entry>();
@@ -27,13 +31,32 @@ public class BigData {
    */
   public void run() {
     readFile();
+    System.out.printf("Database loaded. Number of entries: %5d\n", contents.size());
 
-    List<String> headers = new ArrayList<String>();
-    headers.add("High school diploma only, 1980");
-    headers.add("Some college or associate's degree, 2000");
-    headers.add("Percent of adults with less than a high school diploma, 1990");
-    headers.add("Some college or associate's degree, 2012-2016");
-    printTable(headers);
+    searchSystem();
+  }
+
+  public void searchSystem() {
+    boolean quit = false;
+
+    System.out.println("Welcome to the search system for Education.csv");
+    System.out.println("This program will print a histogram of the data header that you select\n\n");
+
+    while (!quit) {
+      for (int i = 0; i < this.headers.size(); i++)
+        System.out.printf("[%2d]: %s\n", i, this.headers.get(i));
+      int headerIndex = -2;
+      while (headerIndex == -2)
+        headerIndex = Prompt.getInt("Select a header, or enter -1 to exit");
+      if (headerIndex == -1)
+        quit = true;
+      else {
+        Stats s = new Stats(this.headers.get(headerIndex), contents);
+        System.out.println(s.histogram());
+        System.out.println(s);
+        Prompt.getString("Press enter to continue");
+      }
+    }
   }
 
   /**
@@ -46,8 +69,13 @@ public class BigData {
     System.out.println("---------------------------------------------------------------------------------------------------------");
     for (Entry entry : contents.subList(start, start + len)) {
       System.out.print(entry);
-      for (String header : headers)
-        System.out.printf(" | " + header.substring(0, 15) + "...: %10.2f", entry.get(header));
+      for (String header : headers) {
+        Double displayed = entry.get(header);
+        if (displayed != null)
+          System.out.printf(" | " + header.substring(0, 15) + "...: %10.2f", displayed);
+        else
+          System.out.printf(" | " + header.substring(0, 15) + "...: %10s", "N/A");
+      }
       System.out.println();
     }
     System.out.println("---------------------------------------------------------------------------------------------------------");
@@ -79,7 +107,7 @@ public class BigData {
     // values on the current line
     List<String> arr = new ArrayList<String>();
     // headers, set this to the first row
-    List<String> headers = null;
+    headers = null;
 
     // while still more characters to parse
     while (input.hasNext()) {
@@ -92,8 +120,8 @@ public class BigData {
         // set headers as the first line
         if (headers == null)
           headers = arr;
-        // only parse normal lines (has 47 columns)
-        else if (arr.size() == COLUMNS) {
+        // only parse normal lines (has 47 columns) and it has something for fips code
+        else if (arr.size() == COLUMNS && !arr.get(0).equals("")) {
           // add a new entry
           contents.add(new Entry(
                 arr.get(0),
@@ -139,7 +167,8 @@ public class BigData {
         } else if (inValue && startedWithQuotes) {
           current += c;
         // add nothing for 2 commas in a row
-        } else if (n == ',') {
+        }
+        if (n == ',') {
           arr.add("");
         }
       // add to current if in a value
@@ -147,6 +176,11 @@ public class BigData {
         current += c;
       }
     }
+
+    // keep usa data separate
+    this.usa = contents.remove(0);
+    // remove first 3 headers
+    this.headers = this.headers.subList(3, this.headers.size());
   }
 }
 
@@ -174,8 +208,11 @@ class Entry {
     // add the headers to the map
     for (int i = 0; i < headers.size(); i++) {
       try {
-        // parse double, removing commas
-        content.put(headers.get(i), Double.parseDouble(values.get(i).replaceAll(",", "")));
+        if (values.get(i).equals(""))
+          content.put(headers.get(i), null);
+        else
+          // parse double, removing commas
+          content.put(headers.get(i), Double.parseDouble(values.get(i).replaceAll(",", "")));
       } catch (NumberFormatException e) {
         // handle none-numbers
         System.err.println("Not a number! " + values.get(i));
@@ -194,7 +231,7 @@ class Entry {
    * @param key Header string to lookup value
    * @return    Value given the header
    */
-  public double get(String key) {
+  public Double get(String key) {
     return content.get(key);
   }
 
@@ -204,5 +241,138 @@ class Entry {
   public String toString() {
     String areaName = this.areaName.length() > 17 ? this.areaName.substring(0, 17) + "..." : this.areaName;
     return String.format("%5s | %2s | %-20s", fips, state, areaName);
+  }
+
+  /**
+   * Equal entry fips, state, area, and all headers
+   * @param otherIn The other entry to compare
+   * @return        Whether the other city is equal tho this
+   */
+  public boolean equals(Object otherIn) {
+    if (otherIn != null && otherIn instanceof Entry) {
+      Entry other = (Entry)otherIn;
+
+      if (this.fips != other.getFips()) return false;
+      if (this.state != other.getState()) return false;
+      if (this.areaName != other.getAreaName()) return false;
+
+      // loop through all entries
+      for (Map.Entry<String, Double> entry : content.entrySet()) {
+        // check that both are equal, otherwise return false
+        if (!entry.getValue().equals(other.get(entry.getKey()))) return false;
+      }
+    }
+
+    // all entries equal
+    return true;
+  }
+}
+
+
+/**
+ * Contains statisticall information about all the info of a header, like
+ * average, range, etc.
+ */
+class Stats {
+  // histogram settings
+  public static final int NUM_BINS = 50;
+  public static final int HEIGHT = 15;
+
+  private String header;
+  private double average;
+  private double low;
+  private double high;
+  private double median;
+  private double range;
+
+  private List<Double> nums;
+
+  public Stats(String header, List<Entry> contents) {
+    this.header = header;
+
+    this.nums = new ArrayList<Double>();
+    for (Entry entry : contents) {
+      Double n = entry.get(header);
+      if (n != null && n == 4932459) System.out.println(entry);
+      if (n != null) nums.add(n);
+    }
+    Collections.sort(nums);
+
+    this.low = nums.get(0);
+    this.high = nums.get(nums.size()-1);
+    this.median = nums.get(nums.size()/2);
+    this.range = this.high - this.low;
+    
+    double total = 0;
+    for (double n : nums)
+      total += n;
+    this.average = total/nums.size();
+  }
+
+  /** Getters */
+  public double getAverage() { return average; }
+  public double getLow() { return low; }
+  public double getHigh() { return high; }
+  public double getMedian() { return median; }
+  public double getRange() { return range; }
+
+  public String histogram() {
+    // height of each bin of the histogram
+    double[] bins = new double[NUM_BINS];
+    // tallest bin
+    double max = 0;
+    
+    // loop through numbers, adding to the apporpriate bin
+    for (double n : this.nums) {
+      // add 0.01 because this.range is inclusive of the highest
+      int bin = (int)((n-this.low)/(double)(this.range+0.01) * NUM_BINS);
+      bins[bin]++;
+    }
+    // get the max
+    for (double bin : bins)
+      max = Math.max(max, bin);
+
+    // the number of characters high each bin of the histogram is
+    int[] printedBins = new int [NUM_BINS];
+    for (int i = 0; i < NUM_BINS; i++)
+      printedBins[i] = (int)(bins[i]/max * HEIGHT);
+
+    // generate the actual histogram
+
+    // header
+    String str = "\n\nFrequencies    " + this.header + "\n             ┏";
+    for (int i = 0; i < NUM_BINS; i++)
+      str += "-";
+    str += "┓\n";
+
+    // content
+    for (int i = HEIGHT; i >= 0; i--) {
+      if (i % 3 == 0)
+        str += String.format("%12.2f |", (double)i/HEIGHT * max);
+      else
+        str += "             |";
+      for (int bin : printedBins) {
+        // print special char for "empty" bins
+        if (bin == 0 && i == 0) str += '.';
+        else str += bin > i ? '@' : ' ';
+      }
+      str += "|\n";
+    }
+    
+    // footer
+    str += "             └";
+    for (int i = 0; i < NUM_BINS; i++)
+      str += i % 10 == 0 ? "|" : "-";
+    str += "┛\n              ";
+    for (int i = 0; i < NUM_BINS; i++)
+      if (i%10 == 0)
+        str += String.format("%-10.0f", (double)i/NUM_BINS * this.range + this.low);
+    str += "\n";
+
+    return str;
+  }
+
+  public String toString() {
+    return String.format("Average: %-10.2f Low: %-10.2f High: %-10.2f Median: %-10.2f Range: %-10.2f", average, low, high, median, range);
   }
 }
