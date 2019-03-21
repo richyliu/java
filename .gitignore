@@ -1,6 +1,7 @@
 **/*.class
 **/.*.swp
 **/*.tmp
+**/assets
 
 # Mac OS generated files #
 ######################

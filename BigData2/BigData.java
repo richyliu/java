@@ -4,21 +4,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
+import java.util.StringTokenizer;
 
 public class BigData {
   // number of columns in the csv
   private static final int COLUMNS = 47;
+  private static final int COLUMNS_DS_2 = 47;
 
   private Scanner input;
   // entries in the csv file
   private List<Entry> contents;
+  private List<Entry> dataset2;
   // usa has separate data
   private Entry usa;
   private List<String> headers;
+  private List<String> headers2;
 
   public BigData() {
     input = FileUtils.openToRead("Education.csv");
     contents = new ArrayList<Entry>();
+    dataset2 = new ArrayList<Entry>();
   }
 
   public static void main(String[] args) {
@@ -31,11 +36,18 @@ public class BigData {
    */
   public void run() {
     System.out.print("Loading databases...");
-    readFile();
+    // readFile();
+    readOtherFiles();
     System.out.printf("\rDatabase loaded. Number of entries: %5d\n", contents.size());
 
-    searchSystem();
-    System.out.println("\nThank you for using Education.csv search system.");
+    List<String> list = new ArrayList<String>();
+    list.add("COSTT4_A");
+    list.add("COSTT4_P");
+    list.add("TUITIONFEE_IN");
+    BigData.printTable(list, this.dataset2);
+
+    // searchSystem();
+    // System.out.println("\nThank you for using Education.csv search system.");
   }
 
   public void searchSystem() {
@@ -105,18 +117,18 @@ public class BigData {
    * Prints a table with the given headers using a random subset of the contents
    * @param headers Given list of headers for the table
    */
-  public void printTable(List<String> headers) {
-    int len = 20;
+  public static void printTable(List<String> headers, List<Entry> contents) {
+    int len = 50;
     int start = (int)(Math.random() * (contents.size() - len));
+
     System.out.println("---------------------------------------------------------------------------------------------------------");
     for (Entry entry : contents.subList(start, start + len)) {
       System.out.print(entry);
       for (String header : headers) {
         Double displayed = entry.get(header);
-        if (displayed != null)
-          System.out.printf(" | " + header.substring(0, 15) + "...: %10.2f", displayed);
-        else
-          System.out.printf(" | " + header.substring(0, 15) + "...: %10s", "N/A");
+        if (displayed == null)
+          displayed = 0.0;
+        System.out.printf(" | " + header.substring(0, Math.min(15, header.length())) + ": %10.2f", displayed);
       }
       System.out.println();
     }
@@ -224,6 +236,32 @@ public class BigData {
     // remove first 3 headers
     this.headers = this.headers.subList(3, this.headers.size());
   }
+
+  public void readOtherFiles() {
+    Scanner inp = FileUtils.openToRead("assets/MERGED2012_13_PP.csv");
+
+    StringTokenizer st = new StringTokenizer(inp.nextLine(), ",");
+    this.headers2 = new ArrayList<String>();
+    while (st.hasMoreTokens()) {
+      this.headers2.add(st.nextToken());
+    }
+
+    List<String> cur = new ArrayList<String>();
+    int num = 0;
+    while (inp.hasNext() && num < 3000) {
+      cur = new ArrayList<String>();
+      String name = "";
+      st = new StringTokenizer(inp.nextLine(), ",");
+      while (st.hasMoreTokens()) {
+        cur.add(st.nextToken());
+      }
+      this.dataset2.add(new Entry("", "", cur.get(3), this.headers2, cur));
+
+      num++;
+      if (num % 50 == 0)
+        System.out.print("\rProcessed: " + num);
+    }
+  }
 }
 
 
@@ -257,7 +295,7 @@ class Entry {
           content.put(headers.get(i), Double.parseDouble(values.get(i).replaceAll(",", "")));
       } catch (NumberFormatException e) {
         // handle none-numbers
-        System.err.println("Not a number! " + values.get(i));
+        // System.err.println("Not a number! " + values.get(i));
       }
     }
   }
