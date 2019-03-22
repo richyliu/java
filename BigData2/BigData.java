@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
 import java.util.StringTokenizer;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class BigData {
   // number of columns in the csv
@@ -37,14 +41,15 @@ public class BigData {
   public void run() {
     System.out.print("Loading databases...");
     // readFile();
+    // writeFile();
     readOtherFiles();
     System.out.printf("\rDatabase loaded. Number of entries: %5d\n", contents.size());
 
-    List<String> list = new ArrayList<String>();
-    list.add("COSTT4_A");
-    list.add("COSTT4_P");
-    list.add("TUITIONFEE_IN");
-    BigData.printTable(list, this.dataset2);
+    // List<String> list = new ArrayList<String>();
+    // list.add("COSTT4_A");
+    // list.add("COSTT4_P");
+    // list.add("TUITIONFEE_IN");
+    // BigData.printTable(list, this.dataset2);
 
     // searchSystem();
     // System.out.println("\nThank you for using Education.csv search system.");
@@ -238,28 +243,69 @@ public class BigData {
   }
 
   public void readOtherFiles() {
-    Scanner inp = FileUtils.openToRead("assets/MERGED2012_13_PP.csv");
+    System.out.println();
+    try {
+      FileReader fr = new FileReader("assets/CollegeScorecard_Raw_Data/MERGED2016_17_PP.csv");
+      PrintWriter pr = new PrintWriter("assets/tuition2016.csv");
+      BufferedReader br = new BufferedReader(fr);
 
-    StringTokenizer st = new StringTokenizer(inp.nextLine(), ",");
-    this.headers2 = new ArrayList<String>();
-    while (st.hasMoreTokens()) {
-      this.headers2.add(st.nextToken());
-    }
-
-    List<String> cur = new ArrayList<String>();
-    int num = 0;
-    while (inp.hasNext() && num < 3000) {
-      cur = new ArrayList<String>();
-      String name = "";
-      st = new StringTokenizer(inp.nextLine(), ",");
+      StringTokenizer st = new StringTokenizer(br.readLine(), ",");
+      this.headers2 = new ArrayList<String>();
       while (st.hasMoreTokens()) {
-        cur.add(st.nextToken());
+        this.headers2.add(st.nextToken());
       }
-      this.dataset2.add(new Entry("", "", cur.get(3), this.headers2, cur));
 
-      num++;
-      if (num % 50 == 0)
-        System.out.print("\rProcessed: " + num);
+      pr.println("ZIP,COST");
+
+      List<String> cur = new ArrayList<String>();
+      int num = 0;
+      Entry entry = null;
+      String line = "";
+      while (((line = br.readLine()) != null) && num < 10000) {
+        cur = new ArrayList<String>();
+        String name = "";
+        st = new StringTokenizer(line, ",");
+        while (st.hasMoreTokens()) {
+          cur.add(st.nextToken());
+        }
+        entry = new Entry("", "", cur.get(3), this.headers2, cur);
+
+        Double costa = entry.get("COSTT4_A");
+        if (costa == null) {
+          costa = entry.get("COSTT4_P");
+          if (costa != null) {
+            pr.print(cur.get(6) + ",");
+            pr.println(costa);
+          }
+        } else {
+          pr.print(cur.get(6) + ",");
+          pr.println(costa);
+        }
+
+        num++;
+        if (num % 200 == 0)
+          System.out.print("\rProcessed: " + num);
+      }
+
+      br.close();
+      pr.close();
+    } catch (IOException e) {
+      System.out.println("File not found");
+    }
+  }
+
+  public void writeFile() {
+    try {
+      PrintWriter pr = new PrintWriter("assets/output2.csv");
+      pr.println("FIPS,PERCENT_DIPLOMA_2012-2016");
+
+      for (Entry entry : this.contents) {
+        pr.println(entry.getFips() + "," + entry.get("Percent of adults with a high school diploma only, 2013-2016"));
+      }
+
+      pr.close();
+    } catch (IOException e) {
+      System.out.println("File not found");
     }
   }
 }
