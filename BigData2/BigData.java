@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
 import java.util.StringTokenizer;
+import java.util.Set;
+import java.util.HashSet;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,48 +15,47 @@ import java.io.PrintWriter;
 public class BigData {
   // number of columns in the csv
   private static final int COLUMNS = 47;
-  private static final int COLUMNS_DS_2 = 47;
 
   private Scanner input;
   // entries in the csv file
   private List<Entry> contents;
-  private List<Entry> dataset2;
   // usa has separate data
   private Entry usa;
   private List<String> headers;
-  private List<String> headers2;
 
   public BigData() {
     input = FileUtils.openToRead("Education.csv");
     contents = new ArrayList<Entry>();
-    dataset2 = new ArrayList<Entry>();
   }
+
 
   public static void main(String[] args) {
     BigData p = new BigData();
     p.run();
   }
 
+
   /**
    * Main run file that is called
    */
   public void run() {
-    System.out.print("Loading databases...");
+    // System.out.print("Loading databases...");
     // readFile();
     // writeFile();
-    readOtherFiles();
-    System.out.printf("\rDatabase loaded. Number of entries: %5d\n", contents.size());
-
-    // List<String> list = new ArrayList<String>();
-    // list.add("COSTT4_A");
-    // list.add("COSTT4_P");
-    // list.add("TUITIONFEE_IN");
-    // BigData.printTable(list, this.dataset2);
+    // processTuitionFile();
+    // convertFipsToZip();
+    // convertZipHighSchoolers();
+    // averageTuitions();
+    // combineData();
+    zipToLatLong();
+    // System.out.printf("\rDatabase loaded. Number of entries: %5d\n", contents.size());
 
     // searchSystem();
     // System.out.println("\nThank you for using Education.csv search system.");
   }
 
+
+  /** Main search runner */
   public void searchSystem() {
     boolean quit = false;
 
@@ -62,6 +63,7 @@ public class BigData {
     System.out.println("Usage:\n\tPress s for scatter plot mode\n\tPress h for histogram mode\n\tPress q to quit\n");
 
     while (!quit) {
+      // get input option
       String input = "";
       while (input.length() == 0)
         input = Prompt.getString("s = scatter plot, h = histogram, q = quit");
@@ -74,6 +76,7 @@ public class BigData {
         searchScatter();
     }
   }
+
 
   /** Prompt the user for histogram display */
   public boolean searchHistogram() {
@@ -94,6 +97,7 @@ public class BigData {
 
     return searchHistogram();
   }
+
 
   /** Prompt the user for scatter plot display */
   public boolean searchScatter() {
@@ -118,6 +122,7 @@ public class BigData {
     return searchScatter();
   }
 
+
   /**
    * Prints a table with the given headers using a random subset of the contents
    * @param headers Given list of headers for the table
@@ -139,6 +144,7 @@ public class BigData {
     }
     System.out.println("---------------------------------------------------------------------------------------------------------");
   }
+
 
   /**
    * Reads the contents of the csv file and stores it into contents List
@@ -242,34 +248,51 @@ public class BigData {
     this.headers = this.headers.subList(3, this.headers.size());
   }
 
-  public void readOtherFiles() {
+
+  /**
+   * Process the college tuitions file, writing the results back out linearly
+   * (not loading the whole file into memory)
+   */
+  public void processTuitionFile() {
     System.out.println();
+
     try {
+      // read in input using FileReader for better performance
       FileReader fr = new FileReader("assets/CollegeScorecard_Raw_Data/MERGED2016_17_PP.csv");
+      // output writers
       PrintWriter pr = new PrintWriter("assets/tuition2016.csv");
       BufferedReader br = new BufferedReader(fr);
 
+      // tokenize the line by commas
       StringTokenizer st = new StringTokenizer(br.readLine(), ",");
-      this.headers2 = new ArrayList<String>();
-      while (st.hasMoreTokens()) {
-        this.headers2.add(st.nextToken());
-      }
+      // headers are in the first line
+      List<String> headers2 = new ArrayList<String>();
+      while (st.hasMoreTokens())
+        headers2.add(st.nextToken());
 
+      // print headers onto the output file
       pr.println("ZIP,COST");
 
+      // current line split by commas
       List<String> cur = new ArrayList<String>();
+      // limit the number of iterations to 10k to prevent crashing
       int num = 0;
+      // current entry
       Entry entry = null;
+      // current line
       String line = "";
-      while (((line = br.readLine()) != null) && num < 10000) {
-        cur = new ArrayList<String>();
-        String name = "";
-        st = new StringTokenizer(line, ",");
-        while (st.hasMoreTokens()) {
-          cur.add(st.nextToken());
-        }
-        entry = new Entry("", "", cur.get(3), this.headers2, cur);
 
+      // get the current line, and do this while there _is_ a current line
+      while (((line = br.readLine()) != null) && num < 10000) {
+        // tokenize the line, adding to cur
+        cur = new ArrayList<String>();
+        st = new StringTokenizer(line, ",");
+        while (st.hasMoreTokens())
+          cur.add(st.nextToken());
+        // add to entry, using the putting the ZIP code in the areaName
+        entry = new Entry("", "", cur.get(3), headers2, cur);
+
+        // write either the academic year costs or the program year costs
         Double costa = entry.get("COSTT4_A");
         if (costa == null) {
           costa = entry.get("COSTT4_P");
@@ -283,26 +306,338 @@ public class BigData {
         }
 
         num++;
+        // print debug statements to show progress
         if (num % 200 == 0)
           System.out.print("\rProcessed: " + num);
       }
 
+      // close resources
       br.close();
+      pr.close();
+    } catch (IOException e) {
+      // catch in case file isn't found
+      System.out.println("File not found");
+    }
+  }
+
+
+  /** Write the parsed results of Education.csv */
+  public void writeFile() {
+    try {
+      // write headers
+      PrintWriter pr = new PrintWriter("assets/output2.csv");
+      pr.println("FIPS,PERCENT_DIPLOMA_2012-2016");
+
+      // write a line with the number of people with high school diplomas from 2013-2016
+      for (Entry entry : this.contents) {
+        pr.println(entry.getFips() + "," + entry.get("Percent of adults with a high school diploma only, 2013-2016"));
+      }
+
+      // close resources
       pr.close();
     } catch (IOException e) {
       System.out.println("File not found");
     }
   }
 
-  public void writeFile() {
-    try {
-      PrintWriter pr = new PrintWriter("assets/output2.csv");
-      pr.println("FIPS,PERCENT_DIPLOMA_2012-2016");
 
-      for (Entry entry : this.contents) {
-        pr.println(entry.getFips() + "," + entry.get("Percent of adults with a high school diploma only, 2013-2016"));
+  /** Convert fips to zips for unemployment and household income data */
+  public void convertFipsToZip() {
+    try {
+      PrintWriter pr = new PrintWriter("assets/unempInZip.csv");
+      // use FileReader for better performance
+      FileReader zipConverterFile = new FileReader("assets/fipszip.csv");
+      BufferedReader zipConverter = new BufferedReader(zipConverterFile);
+      FileReader unemploymentFile = new FileReader("assets/unemploymentAndIncome.csv");
+      BufferedReader unemployment = new BufferedReader(unemploymentFile);
+
+      // make a hashmap from county code to zip(s)
+      Map<String, Set<String>> zips = new HashMap<String, Set<String>>();
+      String line = "";
+      zipConverter.readLine();
+
+      // get the line
+      while ((line = zipConverter.readLine()) != null) {
+        // first index is fips, second is zip
+        String[] parts = line.split(",");
+        // start a new set if not already have
+        if (!zips.containsKey(parts[0]))
+          zips.put(parts[0], new HashSet<String>());
+        // add it to the set
+        zips.get(parts[0]).add(parts[1]);
+      }
+      zipConverter.close();
+
+      // convert unemployment from fips to zip
+      line = "";
+      unemployment.readLine();
+
+      // get the line
+      while ((line = unemployment.readLine()) != null) {
+        // add ",a" to prevent weird split bug
+        String[] parts = (line + ",a").split(",");
+        // get the set of zips for the current fips code
+        Set<String> zip = zips.get(parts[0]);
+        if (zip != null && parts[1].length() > 0 && parts[2].length() > 0) {
+          // print for each zip code
+          for (String z : zip)
+            pr.println(z + "," + parts[1] + "," + parts[2]);
+        }
       }
 
+      unemployment.close();
+      pr.close();
+    } catch (IOException e) {
+      System.out.println("File not found");
+    }
+  }
+
+
+  /** Convert fips to zips for high schoolers data */
+  public void convertZipHighSchoolers() {
+    try {
+      PrintWriter pr = new PrintWriter("assets/zipHighSchoolers.csv");
+      // use FileReader for better performance
+      FileReader zipConverterFile = new FileReader("assets/fipszip.csv");
+      BufferedReader zipConverter = new BufferedReader(zipConverterFile);
+      FileReader highSchoolersFile = new FileReader("assets/highschoolers.csv");
+      BufferedReader highSchoolers = new BufferedReader(highSchoolersFile);
+
+      // make a hashmap from county code to zip(s)
+      Map<String, Set<String>> zips = new HashMap<String, Set<String>>();
+      String line = "";
+      zipConverter.readLine();
+
+      // get the line
+      while ((line = zipConverter.readLine()) != null) {
+        // first index is fips, second is zip
+        String[] parts = line.split(",");
+        // start a new set if not already have
+        if (!zips.containsKey(parts[0]))
+          zips.put(parts[0], new HashSet<String>());
+        // add it to the set
+        zips.get(parts[0]).add(parts[1]);
+      }
+      zipConverter.close();
+
+      // convert unemployment from fips to zip
+      line = "";
+      highSchoolers.readLine();
+
+      pr.println("ZIP,ONLY_HIGHSCHOOL_PERCENTAGE");
+      // get the line
+      while ((line = highSchoolers.readLine()) != null) {
+        // add ",a" to prevent weird split bug
+        String[] parts = (line + ",a").split(",");
+        // get the set of zips for the current fips code
+        Set<String> zip = zips.get(parts[0]);
+        if (zip != null && parts[1].length() > 0) {
+          // print for each zip code
+          for (String z : zip)
+            pr.println(z + "," + parts[1]);
+        }
+      }
+
+      highSchoolers.close();
+      pr.close();
+    } catch (IOException e) {
+      System.out.println("File not found");
+    }
+  }
+
+
+  /** Average the tuitons from 2013-2016 */
+  public void averageTuitions() {
+    try {
+      PrintWriter pr = new PrintWriter("assets/averageTuition.csv");
+
+      // map between zip code and the (tuition, number of times it's been added)
+      Map<String, Pair<Double>> tuitions = new HashMap<String, Pair<Double>>();
+
+      // for each year 2013..2016
+      for (int i = 3; i <= 6; i++) {
+        // use FileReader for better performance
+        FileReader tuitionFile = new FileReader("assets/tuition201" + i + ".csv");
+        BufferedReader tuitionReader = new BufferedReader(tuitionFile);
+
+        String line;
+        // no need for headers
+        tuitionReader.readLine();
+
+        // get the line
+        while ((line = tuitionReader.readLine()) != null) {
+          // first index is zip, second is tuition fee
+          String[] parts = line.split(",");
+          Double fee = 0.0;
+          try {
+            fee = Double.parseDouble(parts[1]);
+          } catch (NumberFormatException e) {
+            System.out.println("not a number: " + parts[1]);
+          }
+          // start from zero
+          if (!tuitions.containsKey(parts[0]))
+            tuitions.put(parts[0], new Pair<Double>(0.0, 0.0));
+          // add tuition to previous tuition of zip
+          Pair<Double> t = tuitions.get(parts[0]);
+          tuitions.put(parts[0], new Pair<Double>(t.x + fee, t.y + 1.0));
+        }
+
+        tuitionReader.close();
+        tuitionFile.close();
+      }
+
+      // print to output the zip code tuition averages
+      pr.println("ZIP,TUITION");
+      for (String key : tuitions.keySet()) {
+        Pair<Double> t = tuitions.get(key);
+        // print the zip codes and the averages
+        pr.printf("%s,%.3f\n", key, (t.x/t.y));
+      }
+
+      pr.close();
+    } catch (IOException e) {
+      System.out.println("File not found");
+    }
+  }
+
+
+  /**
+   * Combine the different data parts together (tuition, percentage highschool
+   * completion, unemployment, and average household income)
+   */
+  public void combineData() {
+    try {
+      PrintWriter pr = new PrintWriter("assets/combined.csv");
+
+      // use FileReader for better performance
+      FileReader tuitionFile = new FileReader("assets/averageTuition.csv");
+      BufferedReader tuitionReader = new BufferedReader(tuitionFile);
+
+      FileReader highSchoolersFile = new FileReader("assets/zipHighSchoolers.csv");
+      BufferedReader highSchoolers = new BufferedReader(highSchoolersFile);
+
+      FileReader unemploymentFile = new FileReader("assets/unempInZip.csv");
+      BufferedReader unemployment = new BufferedReader(unemploymentFile);
+
+      // map between zip code and the headers to contents
+      Map<String, Map<String, String>> output = new HashMap<String, Map<String, String>>();
+
+      String line;
+      // no need for headers
+      tuitionReader.readLine();
+      highSchoolers.readLine();
+      unemployment.readLine();
+
+      // read the tuition information
+      while ((line = tuitionReader.readLine()) != null) {
+        // first index is zip, second is tuition fee
+        String[] parts = line.split(",");
+        if (!output.containsKey(parts[0]))
+          output.put(parts[0], new HashMap<String, String>());
+        // add tuition to output
+        output.get(parts[0]).put("TUITION", parts[1]);
+      }
+
+      // read the highSchoolers information
+      while ((line = highSchoolers.readLine()) != null) {
+        // first index is zip, second is high school completion only percentage
+        String[] parts = line.split(",");
+        if (!output.containsKey(parts[0]))
+          output.put(parts[0], new HashMap<String, String>());
+        // add highSchoolers to output
+        output.get(parts[0]).put("HIGHSCHOOLERS", parts[1]);
+      }
+
+      // read the unemployment information
+      while ((line = unemployment.readLine()) != null) {
+        // first index is zip, second is unemployment percentage and household income
+        String[] parts = line.split(",");
+        if (!output.containsKey(parts[0]))
+          output.put(parts[0], new HashMap<String, String>());
+        // add unemployment to output
+        output.get(parts[0]).put("UNEMPLOYMENT", parts[1]);
+        output.get(parts[0]).put("INCOME", parts[2]);
+      }
+
+
+      tuitionReader.close();
+      tuitionFile.close();
+      highSchoolersFile.close();
+      highSchoolers.close();
+      unemploymentFile.close();
+      unemployment.close();
+
+      // print to output the zip code tuition averages
+      pr.println("ZIP,TUITION,HIGHSCHOOLERS,UNEMPLOYMENT,INCOME");
+      for (String zip : output.keySet()) {
+        String[] data = {
+          output.get(zip).get("TUITION"),
+          output.get(zip).get("HIGHSCHOOLERS"),
+          output.get(zip).get("UNEMPLOYMENT"),
+          output.get(zip).get("INCOME")
+        };
+        if (data[0] == null || data[1] == null || data[2] == null || data[3] == null)
+          continue;
+
+        // print the zip codes and the data
+        pr.printf("%s,%s,%s,%s,%s\n",
+            zip,
+            data[0],
+            data[1],
+            data[2],
+            data[3]
+            );
+      }
+
+      pr.close();
+    } catch (IOException e) {
+      System.out.println("File not found");
+    }
+  }
+
+
+  public void zipToLatLong() {
+    try {
+      PrintWriter pr = new PrintWriter("assets/inLatLong.csv");
+
+      // use FileReader for better performance
+      FileReader latLongFile = new FileReader("assets/coordzip.csv");
+      BufferedReader latLongReader = new BufferedReader(latLongFile);
+      FileReader combinedFile = new FileReader("assets/combined.csv");
+      BufferedReader combined = new BufferedReader(combinedFile);
+
+      // map between zip code and lat long (coordinates)
+      Map<String, Pair<String>> latLong = new HashMap<String, Pair<String>>();
+
+      String line;
+      // no need for headers
+      latLongReader.readLine();
+      combined.readLine();
+      pr.println("LAT,LONG,TUITION,HIGHSCHOOLERS,UNEMPLOYMENT,INCOME");
+
+      // read the lat long information
+      while ((line = latLongReader.readLine()) != null) {
+        // first index is zip, second is tuition lat, third is long
+        String[] parts = line.split(",");
+        // add lat long
+        latLong.put(parts[0], new Pair<String>(parts[1], parts[2]));
+      }
+
+      // read the combined information
+      while ((line = combined.readLine()) != null) {
+        // first index is zip, second+ is data
+        String zip = line.substring(0, line.indexOf(','));
+        String data = line.substring(line.indexOf(',') + 1);
+        // convert to lat long, write to file
+        Pair coord = latLong.get(zip);
+        if (coord != null)
+          pr.printf("%s,%s,%s\n", coord.x, coord.y, data);
+        else
+          System.out.println("got null for zip: " + zip);
+      }
+
+      latLongReader.close();
+      combined.close();
       pr.close();
     } catch (IOException e) {
       System.out.println("File not found");
@@ -346,6 +681,7 @@ class Entry {
     }
   }
 
+
   /** Getters **/
 
   public String getFips() { return fips; }
@@ -361,6 +697,7 @@ class Entry {
     return content.get(key);
   }
 
+
   /**
    * Convert the entry to a string (for debuggin)
    */
@@ -368,6 +705,7 @@ class Entry {
     String areaName = this.areaName.length() > 17 ? this.areaName.substring(0, 17) + "..." : this.areaName;
     return String.format("%5s | %2s | %-20s", fips, state, areaName);
   }
+
 
   /**
    * Equal entry fips, state, area, and all headers
@@ -438,6 +776,7 @@ class Stats {
     this.average = total/nums.size();
   }
 
+
   /** Getters */
   public double getAverage() { return average; }
   public double getLow() { return low; }
@@ -502,6 +841,7 @@ class Stats {
     return str;
   }
 
+
   public static String scatter(String header1, String header2, List<Entry> contents) {
     Stats data1 = new Stats(header1, contents);
     Stats data2 = new Stats(header2, contents);
@@ -562,6 +902,7 @@ class Stats {
 
     return str;
   }
+
 
   public String toString() {
     return String.format("Average: %-10.2f Low: %-10.2f High: %-10.2f Median: %-10.2f Range: %-10.2f", average, low, high, median, range);
