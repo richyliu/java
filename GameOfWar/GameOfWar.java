@@ -25,13 +25,12 @@ public class GameOfWar
 	}
 
 	/**	Prints the introduction to the game */
-	public void printIntroduction()
-	{
+	public void printIntroduction() {
 		System.out.println("   ______                        ____  ____   _       __");
 		System.out.println("  / ____/___ _____ ___  ___     / __ \\/ __/  | |     / /___ ______");
 		System.out.println(" / / __/ __ `/ __ `__ \\/ _ \\   / / / / /_    | | /| / / __ `/ ___/");
 		System.out.println("/ /_/ / /_/ / / / / / /  __/  / /_/ / __/    | |/ |/ / /_/ / /");
-		System.out.println("\\____/\\__,_/_/ /_/ /_/\\___/   \\____/_/       |__/|__/\\__,_/_/"); 
+		System.out.println("\\____/\\__,_/_/ /_/ /_/\\___/   \\____/_/       |__/|__/\\__,_/_/");
 		System.out.println("\nWelcome to the Game of War");
 	}
 
@@ -63,7 +62,12 @@ public class GameOfWar
 			if (player.size() == 0 || computer.size() == 0)
 				quit = true;
 
-			System.out.printf("Deck sizes: player = %d, computer = %d\n\n", player.size(), computer.size());
+			if (player.size() == 0)
+				System.out.println("Deck sizes: player = 0, computer = 52\n");
+			else if (computer.size() == 0)
+				System.out.println("Deck sizes: player = 52, computer = 0\n");
+			else
+				System.out.printf("Deck sizes: player = %d, computer = %d\n\n", player.size(), computer.size());
 		}
 
 		System.out.println();
@@ -73,6 +77,7 @@ public class GameOfWar
 			System.out.println("Congratulations - PLAYER won!!");
 		else
 			System.out.println("Thank you for playing");
+		System.out.println();
 	}
 
 	public void battle() {
@@ -87,7 +92,17 @@ public class GameOfWar
 
 		int compare = playerDraw.compareTo(computerDraw);
 
+		int count = 0;
 		while (compare == 0) {
+			count++;
+			if (count == 2) {
+				System.out.println("\033[0;31m===========================================================================");
+				System.out.println("===========================================================================");
+				System.out.println("===========================================================================");
+				System.out.println("===========================================================================");
+				System.out.println("===========================================================================");
+				System.out.println("===========================================================================");
+			}
 			System.out.println("Its a tie! Battle again!");
 			for (int i = 0; i < 3; i++) {
 				if (player.isEmpty() || computer.isEmpty()) return;
@@ -106,13 +121,10 @@ public class GameOfWar
 		}
 
 		int potSize = pot.size();
-		System.out.println("==================" + potSize);
 		if (compare > 0) {
 			System.out.print("You");
-			while(!pot.isEmpty()) {
-				System.out.print("1");
+			while(!pot.isEmpty())
 				player.add(pot.draw());
-			}
 		} else {
 			System.out.print("The computer");
 			while(!pot.isEmpty())

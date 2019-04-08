@@ -19,9 +19,28 @@ public class SinglyLinkedList<E extends Comparable<E>>
 
 	/** Copy constructor */
 	public SinglyLinkedList(SinglyLinkedList<E> oldList) {
-		// copy the head and tail of the other list
-		head = new ListNode<E>(oldList.head.getValue(), oldList.head.getNext());
-		tail = new ListNode<E>(oldList.tail.getValue(), oldList.tail.getNext());
+		// copy empty list
+		if (oldList.head == null) {
+			head = tail = null;
+		} else {
+			// copy over the old head
+			head = new ListNode<E>(oldList.head.getValue());
+
+			// keep track of pointer to old list node
+			ListNode<E> other = oldList.head;
+			// and new list node
+			ListNode<E> cur = head;
+			// while still more nodes to copy
+			while (other.getNext() != null) {
+				// copy the node
+				cur.setNext(new ListNode<E>(other.getNext().getValue(), other.getNext().getNext()));
+				// advance pointers to nodes
+				cur = cur.getNext();
+				other = other.getNext();
+			}
+			// set tail to the end of the list
+			tail = cur;
+		}
 	}
 
 	/** Clears the list of elements */
