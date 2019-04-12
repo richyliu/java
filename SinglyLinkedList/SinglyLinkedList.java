@@ -195,6 +195,10 @@ public class SinglyLinkedList<E extends Comparable<E>>
 				ListNode<E> removed = node.getNext();
 				// link previous to next node
 				node.setNext(removed.getNext());
+				// update the tail if it was removed
+				if (removed == tail) {
+					tail = node;
+				}
 				// return removed node
 				return removed.getValue();
 			}

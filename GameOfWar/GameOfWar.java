@@ -67,7 +67,8 @@ public class GameOfWar
 		source.shuffle();
 		player.clear();
 		computer.clear();
-		for (int i = 0; i < 26; i++) {
+		int size = source.size();
+		for (int i = 0; i < size / 2; i++) {
 			player.add(source.draw());
 			computer.add(source.draw());
 		}
