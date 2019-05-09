@@ -1,9 +1,12 @@
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *	Binary Tree of Comparable values.
  *	The tree only has unique values. It does not add duplicate values.
  *
- *	@author
- *	@since
+ *	@author	Richard Liu
+ *	@since	May 7, 2019
  */
 public class BinaryTree<E extends Comparable<E>> {
 
@@ -21,8 +24,8 @@ public class BinaryTree<E extends Comparable<E>> {
 	 *	@param value		the value to put into the tree
 	 */
 	public void add(E value) {
-		//addIterative(value);
-		addRecursive(value);
+		addIterative(value);
+		//addRecursive(value);
 	}
 
 	/** Adds the node by looping through the levels of the tree iteratively */
@@ -65,6 +68,7 @@ public class BinaryTree<E extends Comparable<E>> {
 		}
 	}
 
+	/** Recursive version of add */
 	public void addRecursive(E value) {
 		// create new node to insert into tree
 		TreeNode<E> newNode = new TreeNode<E>(value);
@@ -77,6 +81,7 @@ public class BinaryTree<E extends Comparable<E>> {
 		addRecurse(value, root);
 	}
 
+	/** Actual recursion part of add */
 	public void addRecurse(E value, TreeNode<E> node) {
 		// node is greater, use left branch
 		if (node.getValue().compareTo(value) > 0) {
@@ -102,11 +107,13 @@ public class BinaryTree<E extends Comparable<E>> {
 		printInorderRecurse(root);
 	}
 
+	/** Recursive method for recursing */
 	public void printInorderRecurse(TreeNode<E> node) {
+		// do nothing if end of branch is reached
 		if (node == null)
 			return;
 		printInorderRecurse(node.getLeft());
-		System.out.println(node.getValue());
+		System.out.print(node.getValue() + " ");
 		printInorderRecurse(node.getRight());
 	}
 
@@ -118,9 +125,10 @@ public class BinaryTree<E extends Comparable<E>> {
 	}
 
 	public void printPreorderRecurse(TreeNode<E> node) {
+		// do nothing if end of branch is reached
 		if (node == null)
 			return;
-		System.out.println(node.getValue());
+		System.out.print(node.getValue() + " ");
 		printPreorderRecurse(node.getLeft());
 		printPreorderRecurse(node.getRight());
 	}
@@ -133,11 +141,12 @@ public class BinaryTree<E extends Comparable<E>> {
 	}
 
 	public void printPostorderRecurse(TreeNode<E> node) {
+		// do nothing if end of branch is reached
 		if (node == null)
 			return;
 		printPostorderRecurse(node.getLeft());
 		printPostorderRecurse(node.getRight());
-		System.out.println(node.getValue());
+		System.out.print(node.getValue() + " ");
 	}
 
 	/**	Return a balanced version of this binary tree
@@ -146,7 +155,44 @@ public class BinaryTree<E extends Comparable<E>> {
 	public BinaryTree<E> makeBalancedTree() {
 		BinaryTree<E> balancedTree = new BinaryTree<E>();
 
+		// get an arraylist of the values in order
+		List<E> inorder = new ArrayList<E>();
+		arrayInorderRecurse(inorder, root);
+		// make a balanced tree using the recursive method
+		balancedTreeRecurse(balancedTree, inorder, 0, inorder.size() - 1);
+
 		return balancedTree;
+	}
+
+	/**
+	 * Make a balanced tree from a list of values
+	 * @param	tree	Source tree to add to
+	 * @param	values	Sorted values (low to high) to add from
+	 * @param 	low		Low end
+	 * @param 	high	High end
+	 */
+	public void balancedTreeRecurse(BinaryTree<E> tree, List<E> values, int low, int high) {
+		// do nothing if low surpassed high
+		if (low > high) return;
+
+		// add the middle value
+		int mid = (high + low) / 2;
+		tree.add(values.get(mid));
+		// return if no other elements between low and high
+		if (low == high) return;
+
+		// otherwise add the values for the low part and high part of the values
+		balancedTreeRecurse(tree, values, low, mid - 1);
+		balancedTreeRecurse(tree, values, mid + 1, high);
+	}
+
+	/** Add to an array in order */
+	public void arrayInorderRecurse(List<E> inorder, TreeNode<E> node) {
+		if (node == null)
+			return;
+		arrayInorderRecurse(inorder, node.getLeft());
+		inorder.add(node.getValue());
+		arrayInorderRecurse(inorder, node.getRight());
 	}
 
 
