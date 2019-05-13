@@ -20,16 +20,12 @@ public class BinaryTree<E extends Comparable<E>> {
 
 	/**	Field accessors and modifiers */
 
-	/**	Add a node to the tree
+	/**
+	 * 	Add a node to the tree iteratively by looping through the levels of the
+	 * 	tree iteratively
 	 *	@param value		the value to put into the tree
 	 */
 	public void add(E value) {
-		addIterative(value);
-		//addRecursive(value);
-	}
-
-	/** Adds the node by looping through the levels of the tree iteratively */
-	public void addIterative(E value) {
 		// create new node to insert into tree
 		TreeNode<E> newNode = new TreeNode<E>(value);
 		// set root if it is null
@@ -68,8 +64,11 @@ public class BinaryTree<E extends Comparable<E>> {
 		}
 	}
 
-	/** Recursive version of add */
-	public void addRecursive(E value) {
+	/**
+	 * Recursive version of add
+	 * @param value		the value to put into the tree
+	 */
+	/*public void add(E value) {
 		// create new node to insert into tree
 		TreeNode<E> newNode = new TreeNode<E>(value);
 		// set root if it is null
@@ -81,7 +80,6 @@ public class BinaryTree<E extends Comparable<E>> {
 		addRecurse(value, root);
 	}
 
-	/** Actual recursion part of add */
 	public void addRecurse(E value, TreeNode<E> node) {
 		// node is greater, use left branch
 		if (node.getValue().compareTo(value) > 0) {
@@ -98,7 +96,7 @@ public class BinaryTree<E extends Comparable<E>> {
 			else
 				addRecurse(value, node.getRight());
 		}
-	}
+	}*/
 
 	/**
 	 *	Print Binary Tree Inorder
