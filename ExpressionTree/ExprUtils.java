@@ -317,11 +317,39 @@ public class ExprUtils {
 	 *	@param tokens	a List of String tokens making up an arithmetic expression
 	 *	@return			true if expression is valid; false otherwise
 	 *
-	 *	Algorithm: (describe here)
+	 *	Algorithm: Checks that operators and operand alternate, and that
+	 * 	parenthesis are balanced
 	 */
 	public boolean hasValidExpression(List<String> tokens) {
+		if (tokens.size() == 0) return false;
 
-		return false;
+		// parenthesis count
+		int paren = 0;
+		// should start with number
+		boolean shouldBeNumber = true;
+
+		for (String token : tokens) {
+			// check parens
+			if (token.equals("(") || token.equals(")")) {
+				if (token.equals("("))
+					paren++;
+				else
+					paren--;
+
+				// invalid if too many closing parens
+				if (paren < 0) return false;
+			} else {
+				// if its a number when its not supposed to be a number or its
+				// a operator when its not supposed to be an operator
+				if (!(isNumber(token) && shouldBeNumber) &&
+					!(isOperator(token) && !shouldBeNumber))
+					return false;
+				shouldBeNumber = !shouldBeNumber;
+			}
+		}
+
+		// parenthesis should be balanced and should end in a number
+		return paren == 0 && !shouldBeNumber;
 	}
 
 

@@ -51,7 +51,22 @@ public class ExpressionTree {
 
 			switch(input) {
 				case "i":
-					expr = Prompt.getString("expression");
+					expr = "";
+					boolean valid = false;
+					while (!valid) {
+						expr = Prompt.getString("expression");
+						List<String> tokens = null;
+						// try to parse the tokens
+						try {
+							// can be parsed, then check if its valid
+							tokens = utils.tokenizeExpression(expr);
+							valid = utils.hasValidExpression(tokens);
+						} catch (Exception e) {}
+						// warn user if its invalid
+						if (!valid)
+							System.out.println("Invalid expression\n");
+					}
+					// valid expression, build the tree
 					root = buildTree();
 					break;
 
