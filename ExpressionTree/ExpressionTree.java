@@ -125,7 +125,7 @@ public class ExpressionTree {
 	 	for (String token : tokens) {
 			TreeNode<String> node = new TreeNode<String>(token);
 			// pop nodes off of treestack and onto operator
-			if (isOp(token)) {
+			if (utils.isOperator(token)) {
 				node.setRight(treeStack.pop());
 				node.setLeft(treeStack.pop());
 			}
@@ -186,19 +186,6 @@ public class ExpressionTree {
 
 		System.err.println("Received invalid operation: " + op);
 		return 0;
-	}
-
-	public boolean isOp(String ch) {
-		switch (ch) {
-			case "+":
-			case "-":
-			case "*":
-			case "/":
-			case "%":
-			case "^":
-				return true;
-		}
-		return false;
 	}
 
 	/**

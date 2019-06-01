@@ -305,7 +305,7 @@ public class ExprUtils {
 	 *	@return			true if "+", "-", "*", "/", "%", or "^"
 	 */
 	public boolean isOperator(String str) {
-		return isOperator(str.charAt(0));
+		return isOperator(str.charAt(0)) && str.length() == 1;
 	}
 
 
